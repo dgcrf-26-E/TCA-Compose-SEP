@@ -48,9 +48,9 @@ services:
       - ./static_volume:/src/TCA/data/static
       - ./media_volume:/src/TCA/data/media
     environment:
-      - VIRTUAL_HOST=acuerdos.dgcor.com, www.acuerdos.dgcor.com
-      - LETSENCRYPT_HOST=acuerdos.dgcor.com, www.acuerdos.dgcor.com
-      - LETSENCRYPT_EMAIL=dgcor.rui23@gmail.com
+      - VIRTUAL_HOST=dg-cft.com, www.dg-cft.com
+      - LETSENCRYPT_HOST=dg-cft.com, www.dg-cft.com
+      - LETSENCRYPT_EMAIL=dgcfr.2026@gmail.com
 
   nginx-proxy:
     profiles: ["server"]
