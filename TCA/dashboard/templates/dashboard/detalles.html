@@ -1,0 +1,281 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Detalles del Registro{% endblock title %}
+
+{% block styles %}
+<style>
+
+    .close-buttonX1 {
+        position: absolute; /* Posiciona el botón respecto al contenedor */
+        top: 10px;          /* Ajusta la posición vertical en la parte superior */
+        right: 10px;        /* Ajusta la posición horizontal en la esquina derecha */
+        background: none;   /* Elimina el fondo del botón */
+        border: none;       /* Elimina el borde */
+        font-size: 24px;    /* Aumenta el tamaño de la "X" */
+        cursor: pointer;    /* Cambia el cursor cuando pases sobre el botón */
+        color: #ff0000;     /* Cambia el color de la "X" */
+    }
+    
+    .close-buttonX1:hover {
+        color: #cc0000;     /* Cambia el color al hacer hover */
+    }
+
+    .msg_container {
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 10px;
+        background-color: #ffffff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 20px;
+    }
+    .msg {
+        margin-bottom: 15px;
+        padding: 15px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        position: relative;
+        padding-left: 15px;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+    .msg:hover {
+        background-color: #f5f3e8;
+        border-color: #DDC9A3;;
+    }
+    .msg:before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 5px;
+        background-color: #235B4E;
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+    .msg:hover:before {
+        background-color: #DDC9A3;;
+    }
+    .msg strong {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #235B4E;
+    }
+    .msg time {
+        font-size: 0.9em;
+        color: #6F7271;
+    }
+    .msg p {
+        margin: 5px 0;
+        color: #2e383e;
+    }
+    .msg a {
+        color: #4BACC6;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    .msg a:hover {
+        text-decoration: underline;
+    }
+    .form1 {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 10px;
+        background-color: #ffffff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .form1 label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+        color: #235B4E;
+    }
+    .form1 textarea {
+        width: calc(100% - 30px);
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        color: #2e383e;
+    }
+    .form1 button[type="submit"] {
+        background-color: #047832;
+        color: #ffffff;
+        padding: 10px 20px;
+        border: 1px solid #235B4E;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+    }
+    .form1 button[type="submit"]:hover {
+        background-color: #10312B;
+        border-color: #235B4E;
+    }
+    .username {
+        text-align: center;
+        padding-right: 10px;
+        font-weight: bold;
+        font-size: 30px;
+        margin-bottom: 10px;
+    }
+    .file-upload-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+    .file-upload-wrapper input[type="file"] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+    .file-upload-button {
+        background-color: #4BACC6;
+        color: #000000;
+        padding: 10px 20px;
+        border: 1px solid #235B4E;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        display: inline-block;
+    }
+    .file-upload-button:hover {
+        background-color: #235B4E;
+    }
+    .file-name {
+        display: inline-block;
+        margin-left: 10px;
+        vertical-align: middle;
+        color: #2e383e;
+    }
+</style>
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock styles %}
+
+{% block content %}
+
+{% if user.is_authenticated %}
+<br>
+<p class="username text-inm-gris-200">Usuario: {{ dataU.nombre }} {{ dataU.apellido }}</p>
+<br>
+<input type="hidden" id="logged-in-user" value="{{ user.id }}">
+{% if dataU.tipo == "1" %}
+<a href="{% url 'editar_registro' registro.idRegistro %}" 
+    class="username text-inm-verde-100">Acuerdo: {{ registro.claveAcuerdo }}</a>
+                        {% else %}
+<p class="username text-inm-verde-100">Acuerdo: {{ registro.claveAcuerdo }}</p>
+{% endif %}
+<br>
+<center>
+    <p class="w-1/2 px-2 text-black"> <b>Descripción:</b> {{ registro.accionR.all.first.descripcion }}</p>
+    <p class="w-1/2 px-2 text-black"> <b>Hallazgo(s):</b> {{ registro.accionR.all.first.antecedente }}</p>
+</center>
+
+<div class="msg_container">
+    {% for mensaje in mensajes %}
+    <div class="msg">
+        <strong>{{ mensaje.usuario.username }}</strong>
+        <time>{{ mensaje.fecha_envio }}</time>
+        <p>{{ mensaje.texto }}</p>
+        {% if mensaje.archivo %}
+        <p><a href="{{ mensaje.archivo.url }}">Descargar archivo adjunto {{ mensaje.archivo_nombre }}</a></p>
+        {% endif %}
+
+        {% if dataU.tipo == "1" %}
+            <div id="confirmDeleteModal{{ forloop.counter }}" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <p>¿Está seguro que desea eliminar este mensaje?</p>
+                    <form id="eliminarForm{{ forloop.counter }}" method="post"
+                        action="{% url 'eliminar_mensaje' mensaje.id %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                            class="action-button bg-inm-rojo-200 hover:bg-inm-rojo-300 rounded-xl text-white">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+
+            <button
+                onclick="document.getElementById('confirmDeleteModal{{ forloop.counter }}').style.display='block'"
+                class="close-buttonX1 py-2 px-3 bg-inm-rojo-300 hover:bg-inm-rojo-100 hover:text-inm-marron-100 rounded-xl text-white text-sm">X</button>
+            <script>
+
+                var closeButtons = document.getElementsByClassName("close");
+                for (var i = 0; i < closeButtons.length; i++) {
+                    closeButtons[i].onclick = function () {
+                        var modal = this.parentElement.parentElement;
+                        modal.style.display = "none";
+                    }
+                }
+            </script>
+        {% endif %}
+
+    </div>
+    {% endfor %}
+</div>
+
+<form id="uploadForm" class="form1" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label for="id_texto">Mensaje:</label>
+    <textarea id="id_texto" name="texto" rows="4" placeholder="Escribe tu mensaje aquí..." required></textarea>
+    <div class="file-upload-wrapper">
+        <button type="button" class="file-upload-button">Seleccionar archivo</button>
+        <input type="file" name="archivo" accept=".pdf,.doc,.docx,.txt,.xlsx" onchange="document.querySelector('.file-name').textContent = this.files[0].name">
+        <span class="file-name">No se ha seleccionado ningún archivo</span>
+    </div>
+    <button type="submit">Enviar</button>
+</form>
+
+{% comment %} <div id="resultMessage"></div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // Función que maneja la subida asíncrona del archivo usando jQuery AJAX
+    $(document).ready(function(){
+        $('#uploadForm').on('submit', function(e){
+            e.preventDefault();  // Evitar que el formulario se envíe de forma normal
+            
+            var formData = new FormData(this);  // Crear objeto FormData con los datos del formulario
+
+            // Realizar la solicitud AJAX
+            $.ajax({
+                url: "{% url 'detalles' registro.idRegistro %}",  // URL de la vista que maneja la subida
+                type: "POST",
+                data: formData,
+                contentType: false,  // Necesario para procesar datos de archivo
+                processData: false,  // Evita que jQuery procese los datos
+                success: function(response){
+                    // Mostrar mensaje de éxito
+                    $('#resultMessage').html('<p style="color:green;">' + response.message + '</p>');
+                    setTimeout(function(){
+                        location.reload();
+                    }, 1000);
+                },
+                error: function(response){
+                    // Mostrar mensaje de error
+                    $('#resultMessage').html('<p style="color:red;">Error: ' + response.responseJSON.error + '</p>');
+                }
+            });
+        });
+    });
+</script> {% endcomment %}
+
+{% endif %}
+{% endblock content %}

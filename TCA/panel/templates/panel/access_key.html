@@ -1,0 +1,26 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+
+{% block title %}Verificar Acceso{% endblock title %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock styles %}
+
+{% block content %}
+
+<div class="container mx-auto py-8 max-w-md">
+  <h2 class="text-xl mb-4">Ingresa la clave de acceso</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="mb-4">
+      {{ form.key.label_tag }}<br>
+      {{ form.key }}
+      {{ form.key.errors }}
+    </div>
+    <button type="submit" class="btn btn-primary bg-inm-verde-100 hover:bg-inm-rojo-200 rounded-xl text-white text-center py-2 px-4">Entrar</button>
+  </form>
+</div>
+{% endblock content %}

@@ -1,0 +1,100 @@
+/* layout */
+body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; margin:18px; color:#0f172a; background:#f8fafc; }
+.page { max-width:960px; margin:0 auto; }
+
+/* caja que contiene el svg: tamaño fijo (no cambia) */
+.map-container {
+  width: 800px;
+  height: 600px;
+  margin: auto;
+  position: relative;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(2,6,23,0.06);
+  overflow: hidden;
+}
+
+/* svg ocupa exactamente el área */
+svg#mapSvg {
+  width: 800px;
+  height: 600px;
+  display:block;
+}
+
+svg path {
+  cursor: pointer;
+  fill: #ccc;
+  stroke: #333;
+  transition: fill 0.2s;
+  outline: none;         /* quita el borde al enfocarse */
+}
+
+svg path:focus {
+  outline: none;         /* asegura que no aparezca el rectángulo azul */
+}
+
+#mapa path {
+  stroke: #333;
+  stroke-width: 1px;
+  cursor: pointer;
+  transition: fill 0.3s;
+}
+
+#mapa path:hover {
+  opacity: 0.7;
+}
+
+/* tooltip */
+#tooltip {
+  position: absolute;
+  pointer-events: none;         /* que no interfiera con hover */
+  display: none;
+  padding: 6px 8px;
+  font-size: 13px;
+  border-radius: 6px;
+  background: rgba(15,23,42,0.92);
+  color: #fff;
+  transform: translate(-50%, -100%); /* centrar horizontal y ubicar encima */
+  white-space: pre-wrap;
+  text-align: center;
+  z-index: 50;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.18);
+}
+
+/* Fondo del modal */
+.modal {
+  display: none; /* oculto por defecto */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+}
+
+/* Caja del modal */
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;        /* ocupar 80% de la pantalla */
+  max-width: 800px;  /* máximo 800px */
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Botón cerrar */
+.close {
+  color: #333;
+  float: right;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: red;
+}
+

@@ -1,0 +1,323 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+
+{% block title %}Editar Acuerdo{% endblock title %}
+
+{% block styles %}
+    <style>
+    .container {
+        width: 50%;
+        margin: 50px auto;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border: 2px solid #f2eddf;
+        background-color: #235B4E;
+        opacity: 0.90;
+        color: rgb(0, 0, 0);
+        text-align: center;
+    }
+
+    .colorRectangulo {
+        border-radius: 15px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border: 5px solid #f2eddf;
+        background-color: #235B4E;
+        opacity: 0.90;
+        color: rgb(0, 0, 0);
+    }
+
+    .colorH1 {
+        font-size: 26px;
+        margin-bottom: 20px;
+        color: #DDC9A3;
+    }
+
+    .colorH2 {
+        font-size: 18px;
+        color: rgb(255, 255, 255);
+    }
+
+    .container h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: rgb(255, 255, 255);
+    }
+
+    label {
+        color: white;
+    }
+
+    input[type="text"], input[type="date"], select, textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+        color: rgb(0, 0, 0);
+        background-color: white;
+    }
+
+
+    .ui-datepicker {
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        background-color: white;
+        border: 1px solid #ccc;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .ui-datepicker-header {
+        background-color: #235B4E;
+        border: none;
+        color: white;
+    }
+
+    .ui-datepicker-title {
+        color: white;
+    }
+
+    .ui-datepicker-calendar td {
+        padding: 5px;
+    }
+
+    .ui-datepicker-calendar td a {
+        color: black;
+        text-decoration: none;
+    }
+
+    .ui-datepicker-calendar td a:hover {
+        background-color: #d2e8d4;
+    }
+
+    .ui-datepicker-close {
+        background-color: #235B4E;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        margin-top: 5px;
+        cursor: pointer;
+    }
+
+    .ui-datepicker-close:hover {
+        background-color: #1a4331;
+    }
+
+    .ui-datepicker-prev {
+        cursor: pointer;
+        margin-right: 40%;
+    }
+
+    .ui-datepicker-next {
+        cursor: pointer;
+    }
+
+
+    input[type="date"]::-webkit-datetime-edit {
+        color: black;
+    }
+    input[type="text"].text-12pt {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.success {
+    background-color: #235B4E;
+    color: white;
+    padding: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+    border-radius: 5px;
+    font-size: 18px;
+}
+
+.error {
+    background-color: #C30E2E;
+    color: white;
+    padding: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+    border-radius: 5px;
+    font-size: 18px;
+}
+
+    </style>
+{% endblock styles %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/i18n/jquery-ui-i18n.min.js"></script>
+
+{% block content %}
+{% if dataU.0.tipo == "1" %}
+    <div class="p-5 flex items-center justify-center">
+
+
+        <form class="w-full" method="post">
+            {% if messages %}
+            <div class="w-full mb-4" id="messages">
+                {% for message in messages %}
+                    <div class="p-4 rounded-lg text-white {{ message.tags }}">
+                        <h2 class="text-xl">{{ message }}</h2>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+            {% csrf_token %}
+            <div class="colorRectangulo rounded-xl border-3 p-6 w-full">
+                <div class="text-center mb-4">
+                    <h1 class="colorH1">Editar Acuerdo</h1>
+                </div>
+                <div class="text-center mb-4">
+                    <div class="p-4 rounded-lg flex justify-between">
+                        <div class="flex-1 text-center">
+
+
+                            <div class="px-2 flex-1 text-center">
+                                <div class="flex flex-col space-y-2">
+                                    <label for="{{ registro_form.claveAcuerdo.id_for_label }}">Clave del Acuerdo:</label>
+                                    {{ registro_form.claveAcuerdo }}
+                                </div>
+                            </div>
+                                                                          
+                            
+                            <div class="py-4 rounded-lg border-3 p-2 w-full">
+                                <h1 class="colorH2">Fechas:</h1>
+                                <div class="p-2 rounded-lg flex justify-between">
+        
+                                    <div class="px-2 flex-1 text-center">
+                                        <div class="flex flex-col space-y-2">
+                                            <label for="{{ registro_form.fecha_inicio.id_for_label }}">Inicio:</label>
+                                            {{ registro_form.fecha_inicio }}
+                                        </div>
+                                    </div>
+        
+                                    <div class="px-2 flex-1 text-center">
+                                        <div class="flex flex-col space-y-2">
+                                            <label for="{{ registro_form.fecha_termino.id_for_label }}">Termino:</label>
+                                            {{ registro_form.fecha_termino }}
+                                        </div>
+                                    </div>
+        
+                                </div>
+                            </div>
+        
+                            <div class="px-2 flex-1 text-center">
+                                <div class="flex flex-col space-y-2">
+                                    <label for="{{ registro_form.rubro.id_for_label }}">Rubro:</label>
+                                    {{ registro_form.rubro }}
+                                </div>
+                            </div>
+
+                            <div class="px-2 flex-1 text-center">
+                                <div class="flex flex-col space-y-2">
+                                    <label for="{{ registro_form.periodo.id_for_label }}">Periodo:</label>
+                                    {{ registro_form.periodo }}
+                                </div>
+                            </div>
+        
+                        </div>
+                        
+                        <div class="flex-1 text-center">
+                            <div class="flex-1 text-center">
+        
+                                <div class="px-2 flex flex-col space-y-2">
+                                    <label for="{{ registro_form.area.id_for_label }}">OR:</label>
+                                    {{ registro_form.area }}
+                                </div>
+        
+                                <div class="px-2 py-10 flex flex-col space-y-2">
+                                    <label for="{{ accion_form.area2.id_for_label }}">Áreas Responsables:</label>
+                                    {{ accion_form.area2 }}
+                                </div>
+        
+        
+                            </div>
+                            <div class="px-2 flex flex-col space-y-2">
+                                <label for="{{ registro_form.porcentaje_avance.id_for_label }}">Porcentaje de Avance:</label>
+                                {{ registro_form.porcentaje_avance }}
+                            </div>
+                            
+                            
+                            <div class="px-2 flex flex-col space-y-2">
+                                <label for="{{ registro_form.estado.id_for_label }}">Estatus:</label>
+                                {{ registro_form.estado }}
+                            </div>
+                        </div>
+                        <div class="flex-1 text-center">
+
+                            <div class="px-2 py-1 flex flex-col">
+                                <label for="{{ accion_form.descripcion.id_for_label }}">Hallazgo(s):</label>
+                                {{ accion_form.antecedente }}
+                            </div>
+        
+                            <div class="px-2 py-1 flex flex-col space-y-2">
+                                <label for="{{ accion_form.descripcion.id_for_label }}">Descripción:</label>
+                                {{ accion_form.descripcion }}
+                            </div>
+        
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="text-center">
+                    <button class="py-3 px-6 mx-1 bg-inm-marron-200 hover:bg-inm-marron-100 rounded-xl text-white">Guardar Cambios</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#id_fecha_inicio").datepicker({
+                dateFormat: 'dd/mm/yy',
+                dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                firstDay: 1,
+                prevText: 'Anterior',
+                nextText: 'Siguiente',
+                currentText: 'Hoy',
+                closeText: 'Cerrar',
+                showButtonPanel: false,
+                buttonText: 'Seleccionar fecha',
+                showAnim: 'slideDown',
+                showOtherMonths: true, 
+                selectOtherMonths: true 
+            });
+    
+            $("#id_fecha_termino").datepicker({
+                dateFormat: 'dd/mm/yy',
+                dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                firstDay: 1,
+                prevText: 'Anterior',
+                nextText: 'Siguiente',
+                currentText: 'Hoy',
+                closeText: 'Cerrar',
+                showButtonPanel: false,
+                buttonText: 'Seleccionar fecha',
+                showAnim: 'slideDown',
+                showOtherMonths: true, 
+                selectOtherMonths: true 
+            });
+        });
+
+
+
+    // $(document).ready(function() {
+    //     setTimeout(function() {
+    //         $('#messages').fadeOut('slow');
+    //     }, 5000);
+    // });
+
+
+
+
+    </script>
+{% endif %}
+{% endblock content %}

@@ -1,0 +1,64 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+
+{% block title %}Administrar Rubros{% endblock title %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock styles %}
+
+{% block estadistica %}
+    
+    <a href="{% url 'periodos_opc' %}" class="bg-inm-verde-100 text-white px-6 py-3 rounded-xl hover:bg-inm-marron-200">Estadistica</a>
+    
+    <a href="{% url 'user_admin:parametros' %}" class="bg-inm-marron-100 hover:bg-inm-gris-100 rounded-xl text-white text-center px-6 py-3">Administrar</a>
+    
+{% endblock estadistica %}
+
+{% block content %}
+  <div class="container mx-auto py-4">
+    <h1 class="text-2xl mb-4">Rubros</h1>
+    <a href="{% url 'user_admin:rubro_create' %}" class="bg-inm-verde-100 text-white px-6 py-3 rounded-xl hover:bg-inm-gris-200">Nuevo Rubro</a>
+    <br>
+    <br>
+    <table class="min-w-full bg-white">
+      <thead>
+        <tr>
+          <th class="text-black">ID</th>
+          <th class="text-black">Rubro</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in perfiles %}
+          <tr>
+            <td>{{ u.idRubro }}</td>
+            <td>{{ u.tipo }}</td>
+            <td>
+              <a href="{% url 'user_admin:rubro_edit' u.pk %}">✏️</a>
+              <a href="{% url 'user_admin:rubro_delete' u.pk %}">🗑️</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">No hay rubros.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if is_paginated %}
+      <div class="mt-4">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}"
+            class="bg-inm-marron-200 hover:bg-inm-marron-100 text-white py-1 px-3 rounded">« Anterior
+          </a>
+        {% endif %}
+          Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}" 
+            class="bg-inm-verde-100 hover:bg-inm-verde-200 text-white py-1 px-3 rounded">
+            Siguiente »
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+{% endblock content %}

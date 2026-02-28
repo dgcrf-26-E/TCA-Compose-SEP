@@ -1,0 +1,12 @@
+postgres_data/
+.env.db
+.env.dev
+static_volume/
+media_volume/
+TCA/data/
+certbot/conf/
+certbot/www/
+TCA/entorno
+certificados/
+vite/node_modules/
+TCA/zdata/

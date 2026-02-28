@@ -1,0 +1,661 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+
+{% block title %}Dashboard{% endblock title %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock styles %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<br>
+<p class="username">Usuario: {{ dataU.0.nombre }} {{ dataU.0.apellido }}</p>
+<input type="hidden" id="logged-in-user" value="{{ user.id }}">
+
+<div class="notification-container">
+    <div id="notification-bell" class="notification-icon" onclick="toggleModal()">
+        <img src="{% static 'icons/bell-red.png' %}" alt="">
+        {% if notificaciones %}
+        <span class="notification-count">{{ notificaciones|length }}</span>
+        {% endif %}
+    </div>
+</div>
+
+
+
+<div id="notificationModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="toggleModal()">&times;</span>
+        <h4>Nuevas Notificaciones</h4>
+        <ul>
+            {% for notificacion in notificaciones %}
+            <li>
+                Nuevo acuerdo creado: <strong>{{ notificacion.registro.claveAcuerdo }}</strong>
+                <br>
+                <a href="{% url 'marcar_notificacion_leida' notificacion.id %}" class="notification-link">Ir al
+                    acuerdo</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+
+<script>
+    function toggleModal() {
+        var modal = document.getElementById("notificationModal");
+        if (modal.style.display === "none" || modal.style.display === "") {
+            modal.style.display = "flex";
+        } else {
+            modal.style.display = "none";
+        }
+    }
+</script>
+
+{% if dataU.0.tipo == "1" %}
+<div class="flex justify-center mb-4">
+    <div class="flex items-center justify-between w-full max-w-4xl">
+        <div class="flex justify-center w-full">
+            <a href="{% url 'crear_registro' %}"
+                class="basis-1/8 py-3 px-6 mx-1 bg-inm-verde-100 hover:bg-inm-verde-200 rounded-xl text-white"
+                type="submit">Agregar Acuerdo</a>
+        </div>
+        <div class="flex justify-end w-full sm:w-auto sm:mr-4">
+            <a href="#popupAcuerdos"
+                class="basis-1/8 py-3 px-5 mx-1 bg-inm-verde-100 hover:bg-inm-verde-200 rounded-xl text-white"
+                type="submit">Carga masiva</a>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="popupAcuerdos" class="overlay">
+    <div id="popupBody">
+        <a href="#" id="cerrar">&times;</a>
+        <div class="popupContent">
+            {% if user.is_authenticated %}
+            <center>
+                <h3>
+                    Carga el archivo de los Acuerdos
+                </h3>
+                <br>
+            </center>
+            <form action="{% url 'carga_masiva' %}" method="post" enctype="multipart/form-data">{% csrf_token %}
+                <p>
+                    {{ formCargar1.archivo }}
+                </p>
+                <br>
+                <p>
+                    <input class="py-2 px-5 mx-1 bg-inm-rojo-300 hover:bg-inm-marron-100 rounded-xl text-white"
+                        type="submit" value="Cargar" />
+                </p>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<label class="elegant-label" id="totales"> </label>
+
+
+<div class="search-container">
+    <input type="text" id="searchStatus1" placeholder="Buscar por Estatus" onkeyup="filterTable()">
+    <input type="text" id="searchClave1" placeholder="Buscar por Clave de Acuerdo/OR" onkeyup="filterTable()">
+    <input type="text" id="searchFechaInicio" placeholder="Buscar por Fecha de Inicio (dd mm yyyy)"
+        onkeyup="filterTable()">
+    <input type="text" id="searchFechaTermino" placeholder="Buscar por Fecha de Término (dd mm yyyy)"
+        onkeyup="filterTable()">
+    <input type="text" id="searchDescripcion" placeholder="Buscar por Descripción" onkeyup="filterTable()">
+    <select id="searchArea" multiple onchange="filterTable()">
+        <option value="show_all">Mostrar todos</option>
+        {% if dataU.0.tipo == "1" %}
+        {% for area in areas_n %}
+        <option value="{{ area }}">{{ area }}</option>
+        {% endfor %}
+        {% elif dataU.0.tipo == "2" %}
+        {% for area in areas_n %}
+        {% if forloop.counter > 32 %}
+        <option value="{{ area }}">{{ area }}</option>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+    </select>
+
+
+</div>
+
+<div class="bdtable bg-inm-marron-100 table-container">
+
+    <table id="myTable" >
+
+        <tr class="header">
+            <th id="claveAcuerdo" class="text-center claveAcuerdo">Clave de Acuerdo</th>
+            <th class="text-center fechaInicio">Fecha Inicio</th>
+            <th class="text-center fechaTermino">Fecha Término</th>
+            <th class="text-center">Rubro</th>
+            <th class="text-center descripcion">Descripción</th>
+            <th class="text-center">Áreas Responsables</th>
+            <th class="text-center">Estatus</th>
+            <th class="text-center">Acciones</th>
+        </tr>
+
+        {% for data in registrosConFechas %}
+        <tr>
+            <td id="claveAcuerdo" class="text-center claveAcuerdo">
+                {% for part in data.clave_acuerdo_partes %}
+                    {{part}}<br>
+                {% endfor %}
+            </td>
+            
+            <td class="text-center fechaInicio">
+                {% for part in data.fecha_inicio %}
+                    {{part}}<br>
+                {% endfor %}
+            </td>
+
+            <td class="text-center fechaTermino">
+                {% for part in data.fecha_termino %}
+                    {{part}}<br>
+                {% endfor %}
+            </td>
+
+            <td>
+                {% for rubro in data.registro.rubro.all %}
+                {{ rubro.tipo }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+            <td class="descripcion">
+                {% for accion in data.registro.accionR.all %}
+                {{ accion.descripcion }}
+                <div class="text-right">
+                    <button class="text-inm-rojo-200 hover:text-inm-marron-200 font-bold ml-2"
+                        onclick="openModal('{{ forloop.parentloop.counter }}_{{ forloop.counter }}')">Ver más</a>
+                </div>
+
+
+
+                <div id="modal{{ forloop.parentloop.counter }}_{{ forloop.counter }}" class="modal">
+                    <div class="modal-content">
+                        <span class="close"
+                            onclick="closeModal('{{ forloop.parentloop.counter }}_{{ forloop.counter }}')">&times;</span>
+                        <h2 class="popupTitle verde">Acuerdo {{ data.registro.claveAcuerdo }}</h2>
+                        <div class="popupSection">
+                            <h3 class="marron">OR:</h3>
+                            <ul>
+                                <li>{{ data.areas_name }}</li>
+                            </ul>
+                        </div>
+                        <div class="popupSection">
+                            <h3 class="marron">Áreas Responsables:</h3>
+                            <ul>
+                                {% for area2 in accion.area2.all %}
+                                <li>{{ area2.name }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="popupSection" style="text-align: justify;">
+                            <h3 class="marron">Descripción:</h3>
+                            <p style="text-align: justify;">{{ accion.descripcion }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {% endfor %}
+            </td>
+
+            <td>
+                {% for accion in data.registro.accionR.all %}
+                {% for area2 in accion.area2.all %}
+                - {{ area2.nickname }}
+                {% endfor %}
+                {% endfor %}
+            </td>
+            <td>
+                {% if data.registro.estado == '1' %}
+                {% if data.diferencia >= -7 %}
+                <div class="text-center py-2" style="background-color: #C30E2E; color: white; border-radius: 5px;">
+                    <span>{{ data.registro.get_estado_display }} Avance: {{ data.porcentaje }} %</span>
+                </div>
+                {% elif data.diferencia >= -15 %}
+                <div class="text-center py-2" style="background-color: #FFFF00; color: #000000; border-radius: 5px;">
+                    <span>{{ data.registro.get_estado_display }} Avance: {{ data.porcentaje }} %</span>
+                </div>
+                {% else %}
+                <div class="text-center py-2" style="background-color: #BC955C; color: white; border-radius: 5px;">
+                    <span>{{ data.registro.get_estado_display }} Avance: {{ data.porcentaje }} %</span>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="text-center py-2" style="background-color: green; color: white; border-radius: 5px;">
+                    <span>{{ data.registro.get_estado_display }} Avance: {{ data.porcentaje }} %</span>
+                    {% if data.registro.estado == '2' %}
+
+                    {% if data.registro.fecha_finalizacion|date:"Y-m-d" != "1970-01-01" %}
+
+                    <p>
+                        el {{ data.registro.fecha_finalizacion }}
+                    </p>
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+                {% endif %}
+            </td>
+
+
+            <td class="actions-column text-center">
+                <div class="action-container">
+                    <a href="{% url 'detalles' data.registro.idRegistro %}" style="background-color: #6F7271;"
+                        class="action-link  hover:bg-inm-rojo-300 rounded-xl text-white ">Detalles</a>
+                    {% if dataU.0.tipo == "1" %}
+                    <a href="{% url 'editar_registro' data.registro.idRegistro %}"
+                        class="action-link bg-inm-verde-200 hover:bg-inm-verde-300 rounded-xl text-white text-center ">Editar</a>
+                    <br><br>
+                    <div id="confirmDeleteModal{{ forloop.counter }}" class="modal">
+                        <div class="modal-content">
+                            <span class="close">&times;</span>
+                            <p>¿Está seguro que desea eliminar este acuerdo?</p>
+                            <form id="eliminarForm{{ forloop.counter }}" method="post"
+                                action="{% url 'eliminar_registro' data.registro.idRegistro %}">
+                                {% csrf_token %}
+                                <button type="submit"
+                                    class="action-button bg-inm-rojo-200 hover:bg-inm-rojo-300 rounded-xl text-white">Eliminar</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <button
+                        onclick="document.getElementById('confirmDeleteModal{{ forloop.counter }}').style.display='block'"
+                        class="py-3 px-4 bg-inm-rojo-200 hover:bg-inm-rojo-300 rounded-xl text-white">Eliminar</button>
+                    <script>
+
+                        var closeButtons = document.getElementsByClassName("close");
+                        for (var i = 0; i < closeButtons.length; i++) {
+                            closeButtons[i].onclick = function () {
+                                var modal = this.parentElement.parentElement;
+                                modal.style.display = "none";
+                            }
+                        }
+                    </script>
+                    {% endif %}
+                </div>
+            </td>
+
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div class="pagination">
+        <span class="step-links">
+            {% if registrosConFechas.has_previous %}
+                <a href="?page=1">&laquo; Pagina 1</a>
+                <a href="?page={{ registrosConFechas.previous_page_number }}">Anterior</a>
+            {% endif %}
+    
+            <span class="current">
+                Page {{ registrosConFechas.number }} of {{ registrosConFechas.paginator.num_pages }}.
+            </span>
+    
+            {% if registrosConFechas.has_next %}
+                <a href="?page={{ registrosConFechas.next_page_number }}">Siguiente</a>
+                <a href="?page={{ registrosConFechas.paginator.num_pages }}">Ultima &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+<br><br><br>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script>
+        function myFunction(idInput) {
+            x1 = 0
+          var input, filter, table, tr, td, i, txtValue, conteo;
+          input = document.getElementById(idInput);
+          table = document.getElementById("myTable");
+          tr = table.getElementsByTagName("tr");
+        
+          conteo = 0
+
+
+          for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[x1];
+            if (td) {
+              txtValue = td.textContent || td.innerText;
+              if (tr[i].style.display == "") {
+                conteo++
+              } 
+            } 
+          }
+          
+          document.getElementById("totales").innerHTML = "Acuerdos: " + conteo
+        }
+    function filterTable() {
+        var inputStatus = document.getElementById("searchStatus1").value.toUpperCase();
+        var inputClave = document.getElementById("searchClave1").value.toUpperCase();
+        var selectedAreas = Array.from(document.getElementById("searchArea").selectedOptions).map(option => option.value.toUpperCase());
+        var inputFechaInicio = document.getElementById("searchFechaInicio").value;
+        var inputFechaTermino = document.getElementById("searchFechaTermino").value;
+        var inputDescripcion = document.getElementById("searchDescripcion").value.toUpperCase();
+        var table = document.getElementById("myTable");
+        var tr = table.getElementsByTagName("tr");
+
+        
+
+        for (var i = 1; i < tr.length; i++) {
+            var tdStatus = tr[i].getElementsByTagName("td")[6];
+            var tdClave = tr[i].getElementsByTagName("td")[0];
+            var tdArea = tr[i].getElementsByTagName("td")[5];
+            var tdFechaInicio = tr[i].getElementsByTagName("td")[1];
+            var tdFechaTermino = tr[i].getElementsByTagName("td")[2];
+            var tdDescripcion = tr[i].getElementsByTagName("td")[4];
+
+            if (tdStatus && tdClave && tdArea && tdFechaInicio && tdFechaTermino && tdDescripcion) {
+                var txtValueStatus = tdStatus.textContent || tdStatus.innerText;
+                var txtValueClave = (tdClave.textContent || tdClave.innerText).replace(/\s+/g,' ');
+                var txtValueArea = tdArea.textContent || tdArea.innerText;
+                var txtValueFechaInicio = (tdFechaInicio.textContent || tdFechaInicio.innerText).replace(/\s+/g, ' ').trim();
+                var txtValueFechaTermino = (tdFechaTermino.textContent || tdFechaTermino.innerText).replace(/\s+/g,' ').trim();
+                var txtValueDescripcion = tdDescripcion.textContent || tdDescripcion.innerText;
+
+                var matchesStatus = txtValueStatus.toUpperCase().indexOf(inputStatus) > -1;
+                var matchesClave = txtValueClave.toUpperCase().indexOf(inputClave) > -1;
+                var matchesArea = selectedAreas.length === 0 || selectedAreas.some(area => txtValueArea.toUpperCase().indexOf(area) > -1);
+
+                var matchesFechaInicio = !inputFechaInicio || (inputFechaInicio == txtValueFechaInicio);
+                var matchesFechaTermino = !inputFechaTermino || (inputFechaTermino === txtValueFechaTermino);
+                var matchesDescripcion = txtValueDescripcion.toUpperCase().indexOf(inputDescripcion) > -1;
+
+                if (matchesStatus && matchesClave && matchesArea && matchesFechaInicio && matchesFechaTermino && matchesDescripcion) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+        myFunction("searchStatus1")
+    }
+
+
+
+
+
+
+    function openAreaModal() {
+        document.getElementById("areaModal").style.display = "block";
+    }
+
+    function closeAreaModal() {
+        document.getElementById("areaModal").style.display = "none";
+    }
+
+    function filterByArea(areaName) {
+        var table = document.getElementById("myTable");
+        var tr = table.getElementsByTagName("tr");
+
+        for (var i = 1; i < tr.length; i++) {
+            var td = tr[i].getElementsByTagName("td")[4];
+            if (td) {
+                var txtValue = td.textContent || td.innerText;
+                if (txtValue.indexOf(areaName) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+        closeAreaModal();
+    }
+
+    document.getElementById('searchArea').addEventListener('change', function () {
+        var select = this;
+        var options = select.options;
+        var selected = [];
+
+        for (var i = 0; i < options.length; i++) {
+            if (options[i].selected) {
+                selected.push(options[i].value);
+            }
+        }
+
+        if (selected.includes('show_all')) {
+            for (var i = 0; i < options.length; i++) {
+                options[i].selected = true;
+            }
+        }
+
+        filterTable();
+
+    });
+
+
+    function openModal(id) {
+        document.getElementById('modal' + id).style.display = 'block';
+    }
+
+    function closeModal(id) {
+        document.getElementById('modal' + id).style.display = 'none';
+    }
+
+
+    window.onclick = function (event) {
+        var modals = document.getElementsByClassName('modal');
+        for (var i = 0; i < modals.length; i++) {
+            if (event.target == modals[i]) {
+                modals[i].style.display = "none";
+            }
+        }
+    }
+
+
+    document.getElementById('pop').addEventListener('click', function (event) {
+        event.preventDefault();
+    });
+
+</script>
+{% endif %}
+
+
+
+{% endblock content %}
+
+
+{% comment %} <!-- {% extends "base/base.html" %}
+
+{% load static %}
+
+{% block title %}Dashboard{% endblock title %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock styles %}
+
+{% block content %}
+
+<div class="bdtable bg-inm-marron-100 table-container">
+
+    <table id="myTable" >
+
+        <tr class="header">
+            <th id="claveAcuerdo" class="text-center claveAcuerdo">Clave de Acuerdo</th>
+            <th class="text-center fechaInicio">Fecha Inicio</th>
+            <th class="text-center fechaTermino">Fecha Término</th>
+            <th class="text-center">Rubro</th>
+            <th class="text-center descripcion">Descripción</th>
+            <th class="text-center">Áreas Responsables</th>
+            <th class="text-center">Estatus</th>
+            <th class="text-center">Acciones</th>
+        </tr>
+
+        {% for data in registrosConFechas %}
+        <tr>
+            <td id="claveAcuerdo" class="text-center claveAcuerdo">
+                {% for part in data.clave_acuerdo_partes %}
+                    {{part}}<br>
+                {% endfor %}
+            </td>
+            
+            <td class="text-center fechaInicio">
+                {% for part in data.fecha_inicio %}
+                    {{part}}<br>
+                {% endfor %}
+            </td>
+
+            <td class="text-center fechaTermino">
+                {% for part in data.fecha_termino %}
+                    {{part}}<br>
+                {% endfor %}
+            </td>
+
+            <td>
+                {% for rubro in data.registro.rubro.all %}
+                {{ rubro.tipo }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+            <td class="descripcion">
+                {% for accion in data.registro.accionR.all %}
+                {{ accion.descripcion }}
+                <div class="text-right">
+                    <button class="text-inm-rojo-200 hover:text-inm-marron-200 font-bold ml-2"
+                        onclick="openModal('{{ forloop.parentloop.counter }}_{{ forloop.counter }}')">Ver más</a>
+                </div>
+
+
+
+                <div id="modal{{ forloop.parentloop.counter }}_{{ forloop.counter }}" class="modal">
+                    <div class="modal-content">
+                        <span class="close"
+                            onclick="closeModal('{{ forloop.parentloop.counter }}_{{ forloop.counter }}')">&times;</span>
+                        <h2 class="popupTitle verde">Acuerdo {{ data.registro.claveAcuerdo }}</h2>
+                        <div class="popupSection">
+                            <h3 class="marron">OR:</h3>
+                            <ul>
+                                <li>{{ data.areas_name }}</li>
+                            </ul>
+                        </div>
+                        <div class="popupSection">
+                            <h3 class="marron">Áreas Responsables:</h3>
+                            <ul>
+                                {% for area2 in accion.area2.all %}
+                                <li>{{ area2.name }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="popupSection" style="text-align: justify;">
+                            <h3 class="marron">Descripción:</h3>
+                            <p style="text-align: justify;">{{ accion.descripcion }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {% endfor %}
+            </td>
+
+            <td>
+                {% for accion in data.registro.accionR.all %}
+                {% for area2 in accion.area2.all %}
+                - {{ area2.nickname }}
+                {% endfor %}
+                {% endfor %}
+            </td>
+            <td>
+                {% if data.registro.estado == '1' %}
+                {% if data.diferencia >= -7 %}
+                <div class="text-center py-2" style="background-color: #C30E2E; color: white; border-radius: 5px;">
+                    <span>{{ data.registro.get_estado_display }} Avance: {{ data.porcentaje }} %</span>
+                </div>
+                {% elif data.diferencia >= -15 %}
+                <div class="text-center py-2" style="background-color: #FFFF00; color: #000000; border-radius: 5px;">
+                    <span>{{ data.registro.get_estado_display }} Avance: {{ data.porcentaje }} %</span>
+                </div>
+                {% else %}
+                <div class="text-center py-2" style="background-color: #BC955C; color: white; border-radius: 5px;">
+                    <span>{{ data.registro.get_estado_display }} Avance: {{ data.porcentaje }} %</span>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="text-center py-2" style="background-color: green; color: white; border-radius: 5px;">
+                    <span>{{ data.registro.get_estado_display }} Avance: {{ data.porcentaje }} %</span>
+                    {% if data.registro.estado == '2' %}
+
+                    {% if data.registro.fecha_finalizacion|date:"Y-m-d" != "1970-01-01" %}
+
+                    <p>
+                        el {{ data.registro.fecha_finalizacion }}
+                    </p>
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+                {% endif %}
+            </td>
+
+
+            <td class="actions-column text-center">
+                <div class="action-container">
+                    <a href="{% url 'detalles' data.registro.idRegistro %}" style="background-color: #6F7271;"
+                        class="action-link  hover:bg-inm-rojo-300 rounded-xl text-white ">Detalles</a>
+                    {% if dataU.0.tipo == "1" %}
+                    <a href="{% url 'editar_registro' data.registro.idRegistro %}"
+                        class="action-link bg-inm-verde-200 hover:bg-inm-verde-300 rounded-xl text-white text-center ">Editar</a>
+                    <br><br>
+                    <div id="confirmDeleteModal{{ forloop.counter }}" class="modal">
+                        <div class="modal-content">
+                            <span class="close">&times;</span>
+                            <p>¿Está seguro que desea eliminar este acuerdo?</p>
+                            <form id="eliminarForm{{ forloop.counter }}" method="post"
+                                action="{% url 'eliminar_registro' data.registro.idRegistro %}">
+                                {% csrf_token %}
+                                <button type="submit"
+                                    class="action-button bg-inm-rojo-200 hover:bg-inm-rojo-300 rounded-xl text-white">Eliminar</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <button
+                        onclick="document.getElementById('confirmDeleteModal{{ forloop.counter }}').style.display='block'"
+                        class="py-3 px-4 bg-inm-rojo-200 hover:bg-inm-rojo-300 rounded-xl text-white">Eliminar</button>
+                    <script>
+
+                        var closeButtons = document.getElementsByClassName("close");
+                        for (var i = 0; i < closeButtons.length; i++) {
+                            closeButtons[i].onclick = function () {
+                                var modal = this.parentElement.parentElement;
+                                modal.style.display = "none";
+                            }
+                        }
+                    </script>
+                    {% endif %}
+                </div>
+            </td>
+
+        </tr>
+        {% endfor %}
+    </table>
+
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if registrosConFechas.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ registrosConFechas.previous_page_number }}">previous</a>
+            {% endif %}
+    
+            <span class="current">
+                Page {{ registrosConFechas.number }} of {{ registrosConFechas.paginator.num_pages }}.
+            </span>
+    
+            {% if registrosConFechas.has_next %}
+                <a href="?page={{ registrosConFechas.next_page_number }}">next</a>
+                <a href="?page={{ registrosConFechas.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+
+</div>
+
+
+
+{% endblock content %} --> {% endcomment %}

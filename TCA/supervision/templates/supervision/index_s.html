@@ -1,0 +1,97 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+
+{% block title %}Vista General de Supervisión{% endblock title %}
+
+{% block styles %}
+{% if debug %}
+<script type="module" src="http://{{ url_i }}:5173/@vite/client"></script>
+
+<script type="module">
+    import RefreshRuntime from 'http://{{ url_i }}:5173/@react-refresh'
+    if (RefreshRuntime) {
+        RefreshRuntime.injectIntoGlobalHook(window)
+        window.$RefreshReg$ = () => { }
+        window.$RefreshSig$ = () => (type) => type
+        window.__vite_plugin_react_preamble_installed__ = true
+    }
+</script>
+
+{% else %}
+{% comment %} Agregar el JS y el CSS que faltan para produccion {% endcomment %}
+{% endif %}
+
+{% endblock styles %}
+
+{% block content %}
+<button onclick="buttonBack()"
+    class="absolute top-1 right-1 bg-inm-rojo-300 hover:bg-inm-rojo-100 transition duration-300 ease-in-out text-white w-8 h-8 rounded-lg shadow-lg text-xl">
+    ☰
+</button>
+<p style="margin-top: -20px" class="md:hidden"></p>
+{% if debug %}
+<script type="module" src="http://{{ url_i }}:5173/src/main.jsx"></script>
+
+<div id="root" class="items-center justify-center min-w-screen min-h-[calc(100vh-180px)] bg-gray-100">
+    <!-- React renderizará aquí -->
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const menuI = document.getElementById("header-button");
+        menuI.classList.toggle("hidden");
+
+        //const footer = document.querySelector('.main-footer');
+        //if (footer) { footer.style.display = 'none'; }
+        const footer = document.getElementById("footer-p");
+        footer.classList.toggle("hidden");
+    });
+
+    function buttonBack() {
+        window.location.href = "{% url 'dashboard' %}";
+    }
+</script>
+
+
+{% else %}
+<div class="flex flex-col content-center min-h-screen px-5 py-2">
+    <center>
+        <div class="py-5 contIcons flex flex-row basis-1/2">
+            <div class="ml-5 basis-1/3">
+                <img class="w-20 h-20" src="{% static 'icons/INSUMOS/militar.png' %}" alt="logo"
+                    style="margin-right: 10px;">
+            </div>
+            <div class="ml-5 basis-1/3">
+                <img class="w-20 h-20" src="{% static 'icons/INSUMOS/municipalidad.png' %}" alt="logo"
+                    style="margin-right: 10px;">
+            </div>
+            <div class="ml-5 basis-1/3">
+                <img class="w-20 h-20" src="{% static 'icons/INSUMOS/grupo.png' %}" alt="logo"
+                    style="margin-right: 10px;">
+            </div>
+        </div>
+        <div class="py-5 contIcons flex items-center basis-1/2">
+            <div class="basis-1/3">
+                <a href="{% url 'superv_urls:registro' %}"
+                    class="bg-inm-verde-200 hover:bg-inm-gris-100 rounded-xl text-white text-center py-5 px-20 mx-1 ml-5">
+                    Registro / Captura
+                </a>
+            </div>
+            <div class="basis-1/3">
+                <a href="{% url 'superv_urls:instrucciones' %}"
+                    class="bg-inm-verde-200 hover:bg-inm-gris-100 rounded-xl text-white text-center py-5 px-20 mx-1 ml-5">
+                    Instrucciones y Hallazgos
+                </a>
+            </div>
+            <div class="basis-1/3">
+                <a href="{% url 'superv_urls:reportes' %}"
+                    class="bg-inm-verde-200 hover:bg-inm-gris-100 rounded-xl text-white text-center py-5 px-20 mx-1 ml-5">
+                    Informes Finales
+                </a>
+            </div>
+        </div>
+    </center>
+</div>
+{% endif %}
+{% endblock content %}

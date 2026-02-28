@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <script src="{% static 'js/carousel.js' %}"></script> -->
+    <title>{% block title %}{% endblock title %}</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/tw-elements.min.css" />
+    {% comment %} <link href="{% static 'css/output.css' %}" rel="stylesheet"> {% endcomment %}
+    
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="{% static 'js/tailwind.config.js' %}"></script>
+    {% block styles %} {% endblock styles %}
+
+    <style>
+      body {
+        background: url("{% static 'imgs/fondo.png' %}") no-repeat center center fixed;
+        background-size: cover;
+        margin: 0;
+        padding: 0;
+        font-family: "Open Sans", sans-serif;
+        background-color: #000;
+
+      }
+
+      .panel {
+        margin-left: 35%;
+      }
+
+      .txt {
+        width: 20%;
+        margin-left: 78%;
+        margin-bottom: 7%;
+      }
+
+      .btn1 {
+        width: 100%;
+        height: 25%;
+      }
+
+
+      .btn-container {
+        margin-left: 38%;
+        width: 22%;
+        height: 7%;
+      }
+
+      .btn1 {
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      .dataIndex {
+        margin-bottom: -30px;
+        color: rgb(155,155,155);
+      }
+
+
+      @media (max-width: 1024px) {
+        .btn-container {
+          margin-left: 38%;
+          width: 22%;
+          height: 7%;
+        }
+      }
+
+      .ground {
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      footer {
+        padding: 15px 0;
+      }
+
+      .footer_container {
+        max-width: 2560px;
+        margin: auto;
+        padding: 0 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap-reverse;
+      }
+
+      .logo {
+        width: 180px;
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      .social_media {
+        margin: 0;
+      }
+
+      .social_media a {
+        color: #000;
+        font-size: 24px;
+        text-decoration: none;
+        transition: .6s;
+      }
+
+      .social_media a:hover {
+        color: gold;
+      }
+
+      .header-style {
+        background-color:rgb(150, 150, 150);
+      }
+
+      .logoGOB {
+
+        margin-top: auto;
+        margin-bottom: auto;
+      }
+
+
+      .main-footer{
+        background-color: #611232;
+        min-height: 56px;
+        color: #FFF;
+        padding: 0px 0 0px;
+        text-align: left;
+        font-weight: 300;
+      }
+
+      footer {
+        padding: 10px 0;
+      }
+
+      .footer_container {
+        max-width: 2560px;
+        margin: auto;
+        padding: 0 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap-reverse;
+      }
+
+      .footer-pleca {
+        background-color: #fff;
+        background-image: url(https://framework-gb.cdn.gob.mx/gobmx/img/pleca.svg);
+        background-repeat: repeat-x;
+      }
+
+
+      .card {
+        background: white;
+        padding: 2rem 3rem;
+        border-radius: 1rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 500px;
+        vertical-align: middle;
+      }
+
+      .titulo {
+        font-size: 1.5rem;
+        color: #b91c1c;
+        margin-bottom: 1rem;
+      }
+
+      p {
+        font-size: 1rem;
+        color: #555;
+      }
+    </style>
+  </head>
+  <body class="flex flex-col mx-auto my-auto min-h-screen">
+    {% comment %} <div class="w-4/4 text-center p-2 bg-[#10312B] mx-10"> {% endcomment %}
+
+    <header class="header-style">
+      <div class='dataIndex'>ßC</div>
+      <div class="flex items-center justify-between">
+        <div class="w-3/4 text-center p-4 lg:p-0 m-auto">
+          <a href="/">
+            <img src="{% static 'icons/banner_TCA.png' %}" alt="Logo Completo" class="scale-[1.3] sm:scale-[1.1] lg:scale-[0.6] ">
+          </a>
+        </div>
+      </div>
+    </header>
+
+
+  <div class="flex justify-center items-center h-[300px]">
+    <div class="card">
+      {% comment %} <img src="/static/img/logo.png" alt="Logo" class="logo" /> {% endcomment %}
+      <h1 class='titulo'>🚧 Servidor en mantenimiento 🚧</h1>
+      <p>
+        Estamos realizando mejoras para brindarte un mejor servicio.<br />
+        Por favor, vuelve a intentarlo más tarde.
+      </p>
+    </div>
+  </div>
+
+
+    <footer class="fixed bottom-0 w-full main-footer ">
+      <div class="footer_container">
+        <div class="logo"> <img src="https://framework-gb.cdn.gob.mx/gobmx/img/logo_blanco.svg" width="150px" alt="logo"
+            style="margin-right: 150px; margin-top: 5px; margin-bottom: 5px"></div>
+        <div class="social_media"></div>
+      </div>
+      <div class="footer-pleca">
+        <br>
+      </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/tw-elements.umd.min.js"></script>
+</body>
+</html>

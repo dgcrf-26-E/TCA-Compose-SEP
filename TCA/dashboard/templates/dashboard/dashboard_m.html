@@ -1,0 +1,453 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+
+{% block title %}Dashboard{% endblock title %}
+
+{% block styles %}
+  {% comment %} <link rel="stylesheet" href="{% static 'css/dashboard.css' %}"> {% endcomment %}
+  <style>
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background-color: white;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 60%;
+        max-width: 600px;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-content p {
+        margin-bottom: 15px;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+  </style>
+{% endblock styles %}
+
+{% comment %} {% block estadistica %}
+  <a href="{% url 'periodos_opc' %}" class="bg-inm-verde-100 text-white px-6 py-3 rounded-xl hover:bg-inm-marron-200">Estadistica</a>
+  {% if dataU.0.tipo == "1" %}
+      <a href="{% url 'user_admin:parametros' %}" class="bg-inm-marron-100 hover:bg-inm-gris-100 rounded-xl text-white text-center px-6 py-3">Administrar</a>
+  {% endif %}
+{% endblock estadistica %} {% endcomment %}
+
+{% block content %}
+  {% if user.is_authenticated %}
+    <div class="relative">
+			<!-- FAB (solo en móvil) -->
+			<button 
+				onclick="toggleMenu()" 
+				class="fixed top-12 right-3 z-30 bg-blue-500 text-white w-10 h-10 rounded-lg shadow-lg text-xl">
+				☰
+			</button>
+
+      <div class="fixed top-12 left-3 z-30">
+        <label class="block text-ceter bg-inm-rojo-300 text-white p-1 rounded-lg" 
+          id="totales"> </label>
+      </div>
+
+			<!-- Menú flotante -->
+			<div id="menu" 
+					class="hidden flex flex-col gap-2 static fixed top-24 bg-white shadow-lg p-4 rounded-xl transition-all duration-300">
+        <a href="{% url 'dashboard' %}" class="bg-inm-gris-100 text-white px-3 py-2 lg:px-6 lg:py-3 rounded-xl hover:bg-inm-verde-200">Panel de Control</a>
+				<a href="{% url 'periodos_opc' %}" class="bg-inm-verde-100 text-white px-6 py-3 rounded-xl hover:bg-inm-marron-200">Estadistica</a>
+        {% if dataU.0.tipo == "1" %}
+            {% comment %} <a href="{% url 'superv_urls:index' %}" class="bg-primary-400 hover:bg-primary-500 rounded-xl text-white text-center px-6 py-3">Supervisión</a> {% endcomment %}
+            <a href="{% url 'user_admin:parametros' %}" class="bg-inm-marron-100 hover:bg-inm-gris-100 rounded-xl text-white text-center px-6 py-3">Administrar</a>
+        {% endif %}
+        <a href="{% url 'logout' %}" class="bg-inm-rojo-300 text-white px-3 py-2 lg:px-6 lg:py-3 rounded-xl hover:bg-inm-rojo-100">Cerrar sesión</a>
+			</div>
+		</div>
+
+    <br>
+    <p class="text-lg text-inm-verde-100 text-center font-bold">
+      ¡BIENVENIDO!<br>{{ dataU.0.nombre }} {{ dataU.0.apellido }}</p>
+    <br>
+
+    <div class="grid grid-cols-2 gap-6">
+      <div class="flex flex-col gap-4">
+
+        <input type="text" id="searchStatus1" 
+          class="text-base w-44 h-8 min-w-0 mx-2 rounded-sm overflow-hidden"
+          placeholder="Buscar por Estatus" 
+          onkeyup="filtrarPorEstatus()">
+        <input type="text" id="searchClave1" class="text-base w-44 h-8 min-w-0 mx-2 rounded-sm overflow-hidden"
+          placeholder="Buscar por Clave" onkeyup="filtrarPorClave()">
+        <input type="text" id="searchDescripcion" class="text-base w-44 h-8 min-w-0 mx-2 rounded-sm overflow-hidden"
+          placeholder="Buscar por Descripción" onkeyup="filtrarPorDesc()">
+
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <select id="filtroArea" multiple {% if dataU.0.tipo == "2" %}hidden{% endif %}
+          class="py-2 rounded">
+          <option disabled selected hidden>Filtrar por Oficina</option>
+          {% comment %} <option value="">Filtro por Area</option> {% endcomment %}
+          {% if dataU.0.tipo == "1" %}
+            {% for area in areas_n %}
+              <option value="{{ area }}">{{ area }}</option>
+            {% endfor %}
+          {% elif dataU.0.tipo == "2" %}
+            {% for area in areas_n %}
+              {% if forloop.counter > 32 %}
+                <option value="{{ area }}">{{ area }}</option>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        </select>
+
+        <select id="filtroAnual" multiple
+          class="py-2 rounded">
+          <option disabled selected hidden>Filtrar por Año</option>
+          {% comment %} <option value="">Filtro por Año</option> {% endcomment %}
+          {% for diaA in lista_años %}
+            <option value="{{ diaA }}">{{ diaA }}</option>
+          {% endfor %}
+        </select>
+
+        <select id="filtroArea2" multiple
+          class="py-2 rounded">
+          <option disabled selected hidden>Filtrar por Dirección</option>
+          {% comment %} <option value="">Filtro por Direccion</option> {% endcomment %}
+          {% for area in areas_n %}
+            {% if forloop.counter > 32 %}
+              <option value="{{ area }}">{{ area }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+
+        <button 
+          onclick="aplicarFiltros()()" 
+          class="bg-blue-500 text-white w-16 h-8 rounded-lg text-base">
+          Filtrar
+        </button>
+      </div>
+		</div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
+      <!-- Tarjeta -->
+      {% for data in registrosConFechas %}
+        <div class="card bg-white shadow-md rounded-xl p-4 max-w-md">
+          {% if data.registro.estado == '1' %}
+						{% if data.diferencia >= -7 %}
+              <p class="text-sm text-center text-white bg-[#C30E2E] rounded-lg">
+            {% elif data.diferencia >= -15 %}
+              <p class="text-sm text-center text-white bg-[#FFFF00] rounded-lg">
+            {% else %}
+              <p class="text-sm text-center text-white bg-[#BC955C] rounded-lg">
+            {% endif %}
+          {% else %}
+            <p class="text-sm text-center text-white bg-inm-verde-100 rounded-lg">
+          {% endif %}
+            <span class="dato-acuerdo font-semibold">
+              {% for part in data.clave_acuerdo_partes %}
+                {% if forloop.last %}
+                  {{part}}
+                {% else %}
+                  {{part}}/
+                {% endif %}
+							{% endfor %}
+            </span>
+          </p>
+
+          {% for accion in data.registro.accionR.all %}
+            <h2 class="text-lg font-bold">Descripción</h2>
+            <p class="dato-desc text-gray-600 line-clamp-3">
+                {{ accion.descripcion }}
+            </p>
+
+            <h2 class="text-lg font-bold">Hallazgo:</h2>
+            <p class="text-gray-600 line-clamp-3">
+              {{ accion.antecedente }}
+            </p>
+          {% endfor %}
+
+          <!-- Campos ocultos -->
+          <div id="extraFields{{ forloop.counter }}" class="hidden mt-2 text-sm text-gray-700 space-y-1">
+            <p><strong>Fecha Inicio:</strong>
+              {% for part in data.fecha_inicio %}
+								{% if forloop.last %}
+                  {{part}}
+                {% else %}
+                  {{part}}/
+                {% endif %}
+							{% endfor %}
+            </p>
+            <p><strong>Fecha Termino:</strong>
+              {% for part in data.fecha_termino %}
+								{% if forloop.last %}
+                  {{part}}
+                {% else %}
+                  {{part}}/
+                {% endif %}
+							{% endfor %}
+            </p>
+            <p><strong>Rubro:</strong><br>
+              {% for rubro in data.registro.rubro.all %}
+								{{ rubro.tipo }}
+								{% if not forloop.last %}, {% endif %}
+							{% endfor %}
+            </p>
+            <p><strong>Areas responsables:</strong><br>
+              {% for accion in data.registro.accionR.all %}
+								{% for area2 in accion.area2.all %}
+									- {{ area2.nickname }}
+								{% endfor %}
+							{% endfor %}
+            </p>
+            {% if data.porcentaje < 100 %}
+              <p class="dato-estatus text-inm-rojo-100 font-bold">Estatus: {{ data.registro.get_estado_display }} Avance: {{ data.porcentaje }} %</p>
+            {% else %}
+              <p class="dato-estatus text-inm-verde-100 font-bold">Estatus: {{ data.registro.get_estado_display }} Avance: {{ data.porcentaje }} %</p>
+            {% endif %}
+            <div class="grid grid-cols-4 gap-2">
+              <a href="{% url 'detalles' data.registro.idRegistro %}" class="p-1 rounded-lg shadow bg-[#6F7271] hover:bg-inm-rojo-100 mx-auto">
+                <img src="{% static 'icons/detalles.svg' %}" alt="icono1" class="w-10 h-10">
+              </a>
+
+              <a href="{% url 'editar_registro' data.registro.idRegistro %}" class="p-1 rounded-lg shadow bg-inm-verde-200 hover:bg-inm-verde-100 mx-auto">
+                <img src="{% static 'icons/editar.svg' %}" alt="icono2" class="w-10 h-10">
+              </a>
+
+              <a href="{% url 'archivos_acuerdo' data.registro.idRegistro %}" class="p-1 rounded-lg shadow bg-inm-marron-200 hover:bg-inm-verde-200 mx-auto">
+                <img src="{% static 'icons/descargar.svg' %}" alt="icono3" class="w-10 h-10">
+              </a>
+
+              <div id="confirmDeleteModal{{ forloop.counter }}" class="modal">
+								<div class="modal-content">
+                  <span class="close" role="button" aria-label="Cerrar" style="cursor:pointer;">&times;</span>
+                  <p>¿Está seguro que desea eliminar este acuerdo?</p>
+                  <form id="eliminarForm{{ forloop.counter }}" method="post"
+                    action="{% url 'eliminar_registro' data.registro.idRegistro %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                      class="action-button bg-inm-rojo-200 hover:bg-inm-rojo-300 rounded-lg text-white">Eliminar</button>
+                  </form>
+								</div>
+							</div>
+
+              <button class="p-1 rounded-lg shadow bg-inm-rojo-200 hover:bg-inm-rojo-300 mx-auto" 
+                onclick="document.getElementById('confirmDeleteModal{{ forloop.counter }}').style.display='block'">
+                <img src="{% static 'icons/borrar.svg' %}" alt="icono4" class="w-10 h-10 text-inm-marron-100">
+              </button>
+
+            </div>
+          </div>
+
+          <button 
+            onclick="toggleExtra(this, 'extraFields{{ forloop.counter }}')" 
+            class="mt-3 text-blue-500 text-sm font-semibold">
+            Ver más
+          </button>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="pagination">
+			<span class="step-links">
+				{% if registrosConFechas.has_previous %}
+					<a href="?page=1&filtro={{ filtroOR }}&año={{ filtroAño }}&resp={{ filtroResp }}" role="button" class="bg-inm-gris-100 hover:bg-inm-gris-200 text-white py-1 px-3 rounded">&laquo; Pagina 1</a>
+					<a href="?page={{ page_obj.previous_page_number }}&filtro={{ filtroOR }}&año={{ filtroAño }}&resp={{ filtroResp }}" role="button" class="bg-inm-marron-200 hover:bg-inm-marron-100 text-white py-1 px-3 rounded">Anterior</a>
+				{% endif %}
+
+				<span class="current">
+					Pagina {{ registrosConFechas.number }} de {{ registrosConFechas.paginator.num_pages }}.
+				</span>
+
+				{% if registrosConFechas.has_next %}
+					<a href="?page={{ registrosConFechas.next_page_number }}&filtro={{ filtroOR }}&año={{ filtroAño }}&resp={{ filtroResp }}" role="button" class="bg-inm-verde-100 hover:bg-inm-verde-200 text-white py-1 px-3 rounded">Siguiente</a>
+					<a href="?page={{ registrosConFechas.paginator.num_pages }}&filtro={{ filtroOR }}&año={{ filtroAño }}&resp={{ filtroResp }}" role="button" class="bg-inm-rojo-200 hover:bg-inm-rojo-300 text-white py-1 px-3 rounded">Ultima &raquo;</a>
+				{% endif %}
+			</span>
+		</div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const menu = document.getElementById("header-button");
+        menu.classList.toggle("hidden");
+        filtrarPorEstatus();
+        //document.getElementById("totales").innerHTML = "Acuerdos: "
+        // Aquí puedes interactuar con los elementos del DOM
+      });
+
+      function toggleMenu() {
+        const menu = document.getElementById("menu");
+        menu.classList.toggle("hidden"); // mostrar si estaba oculto
+        menu.classList.toggle("scale-y-0"); // cerrar
+        menu.classList.toggle("scale-y-100"); // abrir
+      }
+
+      function toggleExtra(btn, id) {
+        const extra = document.getElementById(id);
+        extra.classList.toggle('hidden');
+        btn.textContent = extra.classList.contains('hidden') ? 'Ver más' : 'Ver menos';
+      }
+
+      function filtrarPorEstatus() {
+        var valorBuscado  = document.getElementById("searchStatus1").value.toLowerCase();
+        const cards = document.querySelectorAll('.card');
+        let visibles = 0;
+
+        cards.forEach(card => {
+
+          if (valorBuscado === "") {
+            visibles++;
+            card.style.display = "block"; // mostrar
+          } else {
+            const texto = card.querySelector('.dato-estatus').innerText.toLowerCase();
+            // ejemplo: "Campo: A"
+            if (texto.includes(valorBuscado)) {
+              card.style.display = "block"; // mostrar
+              visibles++;
+            } else {
+              card.style.display = "none"; // ocultar
+            }
+          }
+        });
+
+        document.getElementById('totales').textContent = 
+          `Acuerdos: ${visibles}`;
+      }
+
+      function filtrarPorDesc() {
+        var valorBuscado  = document.getElementById("searchDescripcion").value.toLowerCase();
+        const cards = document.querySelectorAll('.card');
+        let visibles = 0;
+
+        cards.forEach(card => {
+
+          if (valorBuscado === "") {
+            visibles++;
+            card.style.display = "block"; // mostrar
+          } else {
+            const texto = card.querySelector('.dato-desc').innerText.toLowerCase();
+            // ejemplo: "Campo: A"
+            if (texto.includes(valorBuscado)) {
+              card.style.display = "block"; // mostrar
+              visibles++;
+            } else {
+              card.style.display = "none"; // ocultar
+            }
+          }
+        });
+
+        document.getElementById('totales').textContent = 
+          `Acuerdos: ${visibles}`;
+      }
+
+      function filtrarPorClave() {
+        var valorBuscado  = document.getElementById("searchClave1").value.toLowerCase();
+        const cards = document.querySelectorAll('.card');
+        let visibles = 0;
+
+        cards.forEach(card => {
+
+          if (valorBuscado === "") {
+            visibles++;
+            card.style.display = "block"; // mostrar
+          } else {
+            const texto = card.querySelector('.dato-acuerdo').innerText.toLowerCase();
+            // ejemplo: "Campo: A"
+            if (texto.includes(valorBuscado)) {
+              card.style.display = "block"; // mostrar
+              visibles++;
+            } else {
+              card.style.display = "none"; // ocultar
+            }
+          }
+        });
+
+        document.getElementById('totales').textContent = 
+          `Acuerdos: ${visibles}`;
+      }
+
+      function aplicarFiltros() {
+				var filtro1 = document.getElementById('filtroArea').value;
+				var filtro2 = document.getElementById('filtroAnual').value;
+				var filtro3 = document.getElementById('filtroArea2').value;
+				var currentUrl = window.location.href.split('?')[0]; // Obtener la URL base sin parámetros
+				var newUrl = currentUrl + '?';
+
+				if (filtro1) {
+					if (newUrl !== currentUrl + '?') {
+						newUrl += '&';
+					}
+					newUrl += 'filtro=' + filtro1;
+				}
+				if (filtro2) {
+					if (newUrl !== currentUrl + '?') {
+						newUrl += '&';
+					}
+					newUrl += 'año=' + filtro2;
+				}
+				if (filtro3) {
+					if (newUrl !== currentUrl + '?') {
+						newUrl += '&';
+					}
+					newUrl += 'resp=' + filtro3;
+				}
+				// Redirigir a la nueva URL con ambos filtros
+				window.location.href = newUrl;
+			}
+
+      function toggleModal() {
+        var modal = document.getElementById("notificationModal");
+        if (modal.style.display === "none" || modal.style.display === "") {
+          modal.style.display = "flex";
+        } else {
+          modal.style.display = "none";
+        }
+      }
+
+      window.onclick = function (event) {
+				var modals = document.getElementsByClassName('modal');
+				for (var i = 0; i < modals.length; i++) {
+					if (event.target == modals[i]) {
+						modals[i].style.display = "none";
+					}
+				}
+			}
+
+      document.querySelectorAll('.modal .close').forEach(function(btn) {
+        btn.addEventListener('click', function (e) {
+          const modal = this.closest('.modal');
+          if (modal) modal.style.display = 'none';
+        });
+      });
+
+      function openModal(id) {
+				document.getElementById('modal' + id).style.display = 'block';
+			}
+
+			function closeModal(id) {
+				document.getElementById('modal' + id).style.display = 'none';
+			}
+    </script>
+  {% endif %}
+
+{% endblock content %}

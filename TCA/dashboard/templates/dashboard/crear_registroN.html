@@ -1,0 +1,290 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+
+{% block title %}Registro Nuevo{% endblock title %}
+
+{% block styles %}
+    <style>
+    .container {
+        width: 50%;
+        margin: 50px auto;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border: 2px solid #f2eddf;
+        background-color: #235B4E;
+        opacity: 0.90;
+        color: rgb(0, 0, 0);
+        text-align: center;
+    }
+
+    .colorRectangulo {
+        border-radius: 15px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border: 5px solid #f2eddf;
+        background-color: #235B4E;
+        opacity: 0.90;
+        color: rgb(0, 0, 0);
+    }
+
+    .colorH1 {
+        font-size: 26px;
+        margin-bottom: 20px;
+        color: #DDC9A3;
+    }
+
+    .colorH2 {
+        font-size: 18px;
+        color: rgb(255, 255, 255);
+    }
+
+    .container h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: rgb(255, 255, 255);
+    }
+
+    label {
+        color: white;
+    }
+
+    input[type="text"], input[type="date"], select, textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+        color: rgb(0, 0, 0);
+        background-color: white;
+    }
+
+
+    .ui-datepicker {
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        background-color: white; /* Cambiar el fondo a blanco */
+        border: 1px solid #ccc; /* Agregar un borde */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Agregar sombra */
+    }
+
+    .ui-datepicker-header {
+        background-color: #235B4E;
+        border: none;
+        color: white;
+    }
+
+    .ui-datepicker-title {
+        color: white;
+    }
+
+    .ui-datepicker-calendar td {
+        padding: 5px;
+    }
+
+    .ui-datepicker-calendar td a {
+        color: black;
+        text-decoration: none;
+    }
+
+    .ui-datepicker-calendar td a:hover {
+        background-color: #d2e8d4;
+    }
+
+    .ui-datepicker-close {
+        background-color: #235B4E;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        margin-top: 5px;
+        cursor: pointer;
+    }
+
+    .ui-datepicker-close:hover {
+        background-color: #1a4331;
+    }
+
+    .ui-datepicker-prev {
+        cursor: pointer;
+        margin-right: 40%;
+    }
+
+    .ui-datepicker-next {
+        cursor: pointer;
+    }
+
+
+    input[type="date"]::-webkit-datetime-edit {
+        color: black;
+    }
+
+
+    </style>
+{% endblock styles %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/i18n/jquery-ui-i18n.min.js"></script>
+
+    
+{% block content %}
+    <div class="p-5 flex items-center justify-center">
+        <form class="w-full" method="post">
+            {% csrf_token %}
+            <div class="colorRectangulo rounded-xl border-3 p-6 w-full">
+                <div class="text-center mb-4">
+                    <h1 class="colorH1">Crear Nuevo Acuerdo</h1>
+                </div>
+                <div class="text-center mb-4">
+                    <div class="p-4 rounded-lg flex justify-between">
+                        <div class="flex-1 text-center">
+        
+                            <div class="px-2 flex flex-col space-y-2">
+                                <label for="id_claveAcuerdo">Clave de Acuerdo:</label>
+                                <input name="claveAcuerdo" id="id_claveAcuerdo" type="text" class="text-center border border-gray-300 rounded-full p-2 text-12pt" placeholder="00/OR/MES/Año">
+                                <!-- <textarea name="claveAcuerdo" cols="40" rows="10" required id="id_claveAcuerdo">Clave de Acuerdo</textarea> -->
+                            </div>
+                            
+                            <div class="py-4 rounded-lg border-3 p-2 w-full">
+                                <h1 class="colorH2">Fechas:</h1>
+                                <div class="p-2 rounded-lg flex justify-between">
+        
+                                    <div class="px-2 flex-1 text-center">
+                                        <div class="flex flex-col space-y-2">
+                                            <label for="id_fecha_inicio">Inicio:</label>
+                                            <input class="text-center" type="datetime" name="fecha_inicio" required id="id_fecha_inicio">
+                                        </div>
+                                    </div>
+        
+                                    <div class="px-2 flex-1 text-center">
+                                        <div class="flex flex-col space-y-2">
+                                            <label for="id_fecha_termino">Termino:</label>
+                                            <input class="text-center" type="datetime" name="fecha_termino" required id="id_fecha_termino">
+                                        </div>
+                                    </div>
+        
+                                </div>
+                            </div>
+        
+                            <div class="px-2 flex-1 text-center">
+                                <div class="flex flex-col space-y-2">
+                                    <label for="id_rubro">Rubro:</label>
+                                
+                                        <select name="rubro" size="6" required id="id_rubro" multiple>
+                                            {% for area in registro_form.fields.rubro.queryset %}
+                                                <option value="{{ area.pk }}"
+                                                    {% if area.pk in registro_form.initial.rubro %} selected{% endif %}>
+                                                    {{ area.pk }}, {{ area.tipo }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                </div>
+                            </div>
+
+                            <div class="px-2 flex-1 text-center">
+                                <div class="flex flex-col space-y-2">
+                                    <label for="id_periodo">Periodo:</label>
+                                
+                                        <select name="periodo" size="3" required id="id_periodo" multiple>
+                                            {% for areass in registro_form.fields.periodo.queryset %}
+                                                <option value="{{ areass.pk }}"
+                                                    {% if areass.pk in registro_form.initial.periodo %} selected{% endif %}>
+                                                    {{ areass.pk }}, {{ areass.desc }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                </div>
+                            </div>
+        
+                        </div>
+                        <div class="flex-1 text-center">
+                            <div class="flex-1 text-center">
+        
+                                <div class="px-2 flex flex-col space-y-2">
+                                    <label for="id_area">OR:</label>
+                                    <select name="area" size="7" required id="id_area" multiple>
+                                        {% for areass in registro_form.fields.area.queryset %}
+                                            {% if areass.pk < 33 %}
+                                                <option value="{{ areass.pk }}"
+                                                    {% if areass.pk in registro_form.initial.area %} selected{% endif %}>
+                                                    {{ areass.pk }}, {{ areass.nickname }}
+                                                </option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+        
+                                <div class="px-2 py-10 flex flex-col space-y-2">
+                                    <label for="id_accion1_area2">Áreas Responsables:</label>
+                                    <select name="accion1_area2" size="7" required id="id_accion1_area2" multiple>
+                                        {% for areass in registro_form.fields.accion1_area2.queryset %}
+                                            <option value="{{ areass.pk }}"
+                                                {% if areass.pk in registro_form.initial.accion1_area2 %} selected{% endif %}>
+                                                {{ areass.pk }}, {{ areass.nickname }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+        
+        
+                            </div>
+                        </div>
+                        <div class="flex-1 text-center">
+        
+                            <div class="px-2 py-10 flex flex-col space-y-2">
+                                <label for="id_accion1_descripcion">Descripción:</label>
+                                <textarea name="accion1_descripcion" cols="40" rows="15" required id="id_accion1_descripcion"></textarea>
+        
+                            </div>
+        
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button class="py-3 px-6 mx-1 bg-inm-marron-200 hover:bg-inm-marron-100 rounded-xl text-white">Guardar Acuerdo</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#id_fecha_inicio").datepicker({
+                dateFormat: 'dd/mm/yy',
+                dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                firstDay: 1,
+                prevText: 'Anterior',
+                nextText: 'Siguiente',
+                currentText: 'Hoy',
+                closeText: 'Cerrar',
+                showButtonPanel: false,
+                buttonText: 'Seleccionar fecha',
+                showAnim: 'slideDown',
+                showOtherMonths: true, 
+                selectOtherMonths: true 
+            });
+    
+            $("#id_fecha_termino").datepicker({
+                dateFormat: 'dd/mm/yy', 
+                dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                prevText: 'Anterior',
+                nextText: 'Siguiente',
+                currentText: 'Hoy',
+                closeText: 'Cerrar',
+                showButtonPanel: false,
+                buttonText: 'Seleccionar fecha',
+                showAnim: 'slideDown',
+                showOtherMonths: true,
+                selectOtherMonths: true
+            });
+        });
+    </script>
+      
+    
+
+    {% endblock content %}

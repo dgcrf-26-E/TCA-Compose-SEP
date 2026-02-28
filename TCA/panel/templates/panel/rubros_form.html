@@ -1,0 +1,28 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+
+{% block title %}Crear Editar Rubro{% endblock title %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock styles %}
+
+{% block content %}
+
+  <div class="container mx-auto py-4">
+  <h1 class="text-2xl mb-4">
+    {% if form.instance.pk %}Editar Rubro{% else %}Crear Rubro{% endif %}
+  </h1>
+  <form method="post">
+    {% csrf_token %}
+    <fieldset>
+      <legend class="font-semibold">Datos del Área</legend>
+      {{ form.as_p }}
+    </fieldset>
+    <button type="submit" class="btn btn-success mt-4 text-white px-6 py-3 rounded-xl bg-inm-verde-100 hover:bg-inm-verde-200">Guardar</button>
+    <a href="{% url 'user_admin:rubro_list' %}" class="btn btn-secondary mt-4 text-white px-6 py-3 rounded-xl bg-inm-rojo-200 hover:bg-inm-rojo-300">Cancelar</a>
+  </form>
+</div>
+
+{% endblock content %}

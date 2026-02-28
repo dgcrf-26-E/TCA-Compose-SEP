@@ -1,0 +1,51 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+
+{% block title %}Modificación de Datos{% endblock title %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock styles %}
+
+{% block estadistica %}
+    
+    <a href="{% url 'periodos_opc' %}" class="bg-inm-verde-100 text-white px-6 py-3 rounded-xl hover:bg-inm-marron-200">Estadistica</a>
+    
+    <a href="{% url 'user_admin:parametros' %}" class="bg-inm-marron-100 hover:bg-inm-gris-100 rounded-xl text-white text-center px-6 py-3">Administrar</a>
+    
+{% endblock estadistica %}
+
+{% block content %}
+    <div class="flex flex-col content-center min-h-screen px-5 py-2">
+        <center>
+            <div class="py-5 contIcons flex flex-row basis-1/2">
+                <div class="ml-5 basis-1/3">
+                    <img class="w-20 h-20" src="{% static 'icons/INSUMOS/militar.png' %}" alt="logo" style="margin-right: 10px;">
+                </div>
+                <div class="ml-5 basis-1/3">
+                    <img class="w-20 h-20" src="{% static 'icons/INSUMOS/municipalidad.png' %}" alt="logo" style="margin-right: 10px;">
+                </div>
+                <div class="ml-5 basis-1/3">
+                    <img class="w-20 h-20" src="{% static 'icons/INSUMOS/grupo.png' %}" alt="logo" style="margin-right: 10px;">
+                </div>
+            </div>
+            <div class="py-5 contIcons flex items-center basis-1/2">
+                <div class="basis-1/3">
+                    <a href="{% url 'user_admin:area_list' %}" 
+                        class="bg-inm-verde-200 hover:bg-inm-gris-100 rounded-xl text-white text-center py-5 px-20 mx-1 ml-5">
+                        Áreas
+                    </a>
+                </div>
+                <div class="basis-1/3">
+                    <a href="{% url 'user_admin:rubro_list' %}" 
+                    class="bg-inm-verde-200 hover:bg-inm-gris-100 rounded-xl text-white text-center py-5 px-20 mx-1 ml-5">Rubros</a>
+                </div>
+                <div class="basis-1/3">
+                    <a href="{% url 'user_admin:usuario_list' %}" 
+                    class="bg-inm-verde-200 hover:bg-inm-gris-100 rounded-xl text-white text-center py-5 px-20 mx-1 ml-5">Usuarios</a>
+                </div>
+            </div>
+        </center>
+    </div>
+{% endblock content %}

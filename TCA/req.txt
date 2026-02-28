@@ -1,0 +1,12 @@
+Django==4.2.20
+djangorestframework==3.14.0
+openpyxl==3.0.10
+sqlparse==0.4.4
+python-dateutil==2.9.0.post0
+python-dotenv==1.0.1
+gunicorn==22.0.0
+psycopg2-binary
+django-environ==0.11.2
+django-cors-headers==4.9.0
+docxcompose==1.4.0
+docxtpl==0.20.1

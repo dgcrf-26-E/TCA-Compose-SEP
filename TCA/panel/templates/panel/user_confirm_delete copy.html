@@ -1,0 +1,23 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+
+{% block title %}Eliminar usuario{% endblock title %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock styles %}
+
+{% block content %}
+
+<div class="container mx-auto py-4">
+  <h1 class="text-2xl mb-4">Borrar Usuario</h1>
+  <p>¿Seguro que deseas borrar a “{{ object.username }}”?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Sí, borrar</button>
+    <a href="{% url 'user_admin:usuario_list' %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+
+{% endblock content %}

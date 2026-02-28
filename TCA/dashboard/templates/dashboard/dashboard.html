@@ -1,0 +1,533 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+
+{% block title %}Dashboard{% endblock title %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock styles %}
+
+{% block estadistica %}
+  <a href="{% url 'periodos_opc' %}" class="bg-inm-verde-100 text-white px-6 py-3 rounded-xl hover:bg-inm-marron-200">Estadistica</a>
+  {% if dataU.0.tipo == "1" %}
+      <a href="{% url 'user_admin:parametros' %}" class="bg-inm-marron-100 hover:bg-inm-gris-100 rounded-xl text-white text-center px-6 py-3">Administrar</a>
+      {% comment %} <a href="{% url 'superv_urls:index' %}" class="bg-primary-400 hover:bg-primary-500 rounded-xl text-white text-center px-6 py-3">Supervisión</a> {% endcomment %}
+  {% endif %}
+{% endblock estadistica %}
+
+{% block content %}
+  {% if user.is_authenticated %}
+    <br>
+    <p class="username">Usuario: {{ dataU.0.nombre }} {{ dataU.0.apellido }}</p>
+    <input type="hidden" id="logged-in-user" value="{{ user.id }}">
+
+    <div class="notification-container">
+        <div id="notification-bell" class="notification-icon" onclick="toggleModal()">
+            <img src="{% static 'icons/bell-red.png' %}" alt="">
+            {% if notificaciones %}
+            	<span class="notification-count">{{ notificaciones|length }}</span>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <div id="notificationModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="toggleModal()">&times;</span>
+        <h4>Nuevas Notificaciones</h4>
+        <ul>
+          {% for notificacion in notificaciones %}
+            <li>{{ notificacion.mensaje }} - {{ notificacion.fecha_creacion }}</li>
+            <a href="{% url 'marcar_notificacion_leida' notificacion.id %}" class="notification-link">
+              Ir al acuerdo</a>
+          {% empty %}
+              <li>No tienes notificaciones nuevas.</li>
+          {% endfor %}
+
+                {% comment %} {% for notificacion in notificaciones %}
+                <li>
+                    Nuevo acuerdo creado: <strong>{{ notificacion.registro.claveAcuerdo }}</strong>
+                    <br>
+                    <a href="{% url 'marcar_notificacion_leida' notificacion.id %}" class="notification-link">Ir al
+                        acuerdo</a>
+                </li>
+                {% endfor %} {% endcomment %}
+        </ul>
+      </div>
+    </div>
+
+    {% if dataU.0.tipo == "1" %}
+      <div class="flex justify-center mb-4">
+        <div class="flex items-center justify-between w-full max-w-4xl">
+          <div class="flex justify-center w-full">
+            <a href="{% url 'crear_registro' %}"
+              class="basis-1/8 py-3 px-5 mx-1 bg-inm-verde-100 hover:bg-inm-verde-200 rounded-xl text-white">
+              Agregar Acuerdo</a>
+          </div>
+                {% comment %} <div class="flex justify-end w-full sm:w-auto sm:mr-4">
+                    <a href="#popupAcuerdos"
+                        class="appearance-none basis-1/8 py-3 px-5 mx-1 bg-inm-verde-100 hover:bg-inm-verde-200 rounded-xl text-white"
+                        >Carga masiva</a>
+                </div> {% endcomment %}
+        </div>
+      </div>
+
+      <div id="popupAcuerdos" class="overlay">
+        <div id="popupBody">
+          <a href="#" id="cerrar">&times;</a>
+          <div class="popupContent">
+            {% if user.is_authenticated %}
+              <center>
+                <h3>Carga el archivo de los Acuerdos</h3>
+                <br>
+              </center>
+              <form action="{% url 'carga_masiva' %}" method="post" enctype="multipart/form-data">{% csrf_token %}
+                <p>{{ formCargar1.archivo }}</p>
+                <br>
+                <p>
+                  <input class="py-2 px-5 mx-1 bg-inm-rojo-300 hover:bg-inm-marron-100 rounded-xl text-white" type="submit" value="Cargar" />
+                </p>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+		{% endif %}
+
+		<label class="elegant-label" id="totales"> </label>
+
+		<div class="search-container">
+			<input type="text" id="searchStatus1" placeholder="Buscar por Estatus" onkeyup="filterTable()">
+			<input type="text" id="searchClave1" placeholder="Buscar por Clave de Acuerdo/OR" onkeyup="filterTable()">
+			<input type="text" id="searchDescripcion" placeholder="Buscar por Descripción" onkeyup="filterTable()">
+
+			<select id="filtroArea" multiple {% if dataU.0.tipo == "2" %}hidden{% endif %}>
+				<option value="">Mostrar todos</option>
+				{% if dataU.0.tipo == "1" %}
+					{% for area in areas_n %}
+						<option value="{{ area }}">{{ area }}</option>
+					{% endfor %}
+				{% elif dataU.0.tipo == "2" %}
+					{% for area in areas_n %}
+						{% if forloop.counter > 32 %}
+							<option value="{{ area }}">{{ area }}</option>
+						{% endif %}
+					{% endfor %}
+				{% endif %}
+			</select>
+			
+
+			<select id="filtroAnual" multiple>
+				<option value="">Mostrar todos</option>
+				{% for diaA in lista_años %}
+					<option value="{{ diaA }}">{{ diaA }}</option>
+				{% endfor %}
+			</select>
+
+			<select id="filtroArea2" multiple>
+				<option value="">Mostrar todos</option>
+				{% for area in areas_n %}
+					{% if forloop.counter > 32 %}
+						<option value="{{ area }}">{{ area }}</option>
+					{% endif %}
+				{% endfor %}
+			</select>
+		</div>
+
+		<div class="bdtable bg-inm-marron-100 table-container">
+			<table id="myTable" >
+				<tr class="header">
+					<th id="claveAcuerdo" class="text-center claveAcuerdo">Clave de Acuerdo</th>
+					<th class="text-center fechaInicio">Fecha Inicio</th>
+					<th class="text-center fechaTermino">Fecha Término</th>
+					<th class="text-center">Rubro</th>
+					<th class="text-center descripcion">Descripción</th>
+					<th class="text-center">Áreas Responsables</th>
+					<th class="text-center">Estatus</th>
+					<th class="text-center">Acciones</th>
+				</tr>
+
+				{% for data in registrosConFechas %}
+					<tr>
+						<td id="claveAcuerdo" class="text-center claveAcuerdo">
+							{% for part in data.clave_acuerdo_partes %}
+								{% if forloop.first %}
+									<strong class="text-xl">{{part}}</strong><br>
+								{% else %}
+									{{part}}
+									<br>
+								{% endif %}
+							{% endfor %}
+						</td>
+						
+						<td class="text-center fechaInicio">
+							{% for part in data.fecha_inicio %}
+								{{part}}
+								<br>
+							{% endfor %}
+						</td>
+
+						<td class="text-center fechaTermino">
+							{% for part in data.fecha_termino %}
+								{{part}}
+								<br>
+							{% endfor %}
+						</td>
+
+						<td>
+							{% for rubro in data.registro.rubro.all %}
+								{{ rubro.tipo }}
+								{% if not forloop.last %}, {% endif %}
+							{% endfor %}
+						</td>
+							
+						<td class="descripcion">
+							{% for accion in data.registro.accionR.all %}
+
+								{{ accion.descripcion }}
+
+								<div class="text-right">
+									{% comment %} aqui habia un <button></a> {% endcomment %}
+									<button class="text-inm-rojo-200 hover:text-inm-marron-200 font-bold ml-2"
+										onclick="openModal('{{ forloop.parentloop.counter }}_{{ forloop.counter }}')">
+										Ver más
+									</button>
+								</div>
+
+								<div id="modal{{ forloop.parentloop.counter }}_{{ forloop.counter }}" class="modal">
+									<div class="modal-content">
+
+										<span class="close"
+											onclick="closeModal('{{ forloop.parentloop.counter }}_{{ forloop.counter }}')">
+											&times;
+										</span>
+
+										<h2 class="popupTitle verde">Acuerdo {{ data.registro.claveAcuerdo }}</h2>
+										
+										<div class="popupSection">
+											<h3 class="marron">OR:</h3>
+											<ul>
+												<li>{{ data.areas_name }}</li>
+											</ul>
+										</div>
+
+										<div class="popupSection">
+											<h3 class="marron">Áreas Responsables:</h3>
+											<ul>
+												{% for area2 in accion.area2.all %}
+													<li>{{ area2.name }}</li>
+												{% endfor %}
+											</ul>
+										</div>
+
+										<div class="popupSection" style="text-align: justify;">
+											<h3 class="marron">Descripción:</h3>
+											<p style="text-align: justify;">{{ accion.descripcion }}</p>
+										</div>
+									</div>
+								</div>
+							{% endfor %}
+						</td>
+
+						<td>
+							{% for accion in data.registro.accionR.all %}
+								{% for area2 in accion.area2.all %}
+									- {{ area2.nickname }}
+								{% endfor %}
+							{% endfor %}
+						</td>
+
+						<td>
+							{% if data.registro.estado == '1' %}
+								{% if data.diferencia >= -7 %}
+									<div class="text-center py-2" style="background-color: #C30E2E; color: white; border-radius: 5px;">
+										<span>{{ data.registro.get_estado_display }} Avance: {{ data.porcentaje }} %</span>
+									</div>
+								{% elif data.diferencia >= -15 %}
+									<div class="text-center py-2" style="background-color: #FFFF00; color: #000000; border-radius: 5px;">
+										<span>{{ data.registro.get_estado_display }} Avance: {{ data.porcentaje }} %</span>
+									</div>
+								{% else %}
+									<div class="text-center py-2" style="background-color: #BC955C; color: white; border-radius: 5px;">
+										<span>{{ data.registro.get_estado_display }} Avance: {{ data.porcentaje }} %</span>
+									</div>
+								{% endif %}
+							{% else %}
+								<div class="text-center py-2" style="background-color: green; color: white; border-radius: 5px;">
+									<span>{{ data.registro.get_estado_display }} Avance: {{ data.porcentaje }} %</span>
+									{% if data.registro.estado == '2' %}
+										{% if data.registro.fecha_finalizacion|date:"Y-m-d" != "1970-01-01" %}
+											<p>el {{ data.registro.fecha_finalizacion }}</p>
+										{% endif %}
+									{% endif %}
+								</div>
+							{% endif %}
+						</td>
+
+						<td class="actions-column text-center">
+							<div class="action-container">
+								<a href="{% url 'detalles' data.registro.idRegistro %}" style="background-color: #6F7271;"
+									class="action-link  hover:bg-inm-rojo-100 rounded-xl text-white ">Detalles</a>
+
+								{% if dataU.0.tipo == "1" %}
+									<a href="{% url 'editar_registro' data.registro.idRegistro %}"
+										class="action-link bg-inm-verde-200 hover:bg-inm-verde-100 rounded-xl text-white text-center ">Editar</a>
+									<a href="{% url 'archivos_acuerdo' data.registro.idRegistro %}"
+										class="action-link bg-inm-marron-200 hover:bg-inm-verde-200 rounded-xl text-white text-center ">Descargar</a>
+											
+									<div id="confirmDeleteModal{{ forloop.counter }}" class="modal">
+										<div class="modal-content">
+											<span class="close">&times;</span>
+											<p>¿Está seguro que desea eliminar este acuerdo?</p>
+											<form id="eliminarForm{{ forloop.counter }}" method="post"
+												action="{% url 'eliminar_registro' data.registro.idRegistro %}">
+												{% csrf_token %}
+												<button type="submit"
+													class="action-button bg-inm-rojo-200 hover:bg-inm-rojo-300 rounded-xl text-white">Eliminar</button>
+											</form>
+										</div>
+									</div>
+
+									<button
+										onclick="document.getElementById('confirmDeleteModal{{ forloop.counter }}').style.display='block'"
+										class="py-3 px-4 bg-inm-rojo-200 hover:bg-inm-rojo-300 rounded-xl text-white">Eliminar</button>
+								{% endif %}
+							</div>
+						</td>
+					</tr>
+				{% endfor %}
+			</table>
+		</div>
+
+		<div class="pagination">
+			<br>
+			<span class="step-links">
+				{% if registrosConFechas.has_previous %}
+					<a href="?page=1&filtro={{ filtroOR }}&año={{ filtroAño }}&resp={{ filtroResp }}" role="button" class="bg-inm-gris-100 hover:bg-inm-gris-200 text-white py-1 px-3 rounded">&laquo; Pagina 1</a>
+					<a href="?page={{ page_obj.previous_page_number }}&filtro={{ filtroOR }}&año={{ filtroAño }}&resp={{ filtroResp }}" role="button" class="bg-inm-marron-200 hover:bg-inm-marron-100 text-white py-1 px-3 rounded">Anterior</a>
+				{% endif %}
+
+				<span class="current">
+					Pagina {{ registrosConFechas.number }} de {{ registrosConFechas.paginator.num_pages }}.
+				</span>
+
+				{% if registrosConFechas.has_next %}
+					<a href="?page={{ registrosConFechas.next_page_number }}&filtro={{ filtroOR }}&año={{ filtroAño }}&resp={{ filtroResp }}" role="button" class="bg-inm-verde-100 hover:bg-inm-verde-200 text-white py-1 px-3 rounded">Siguiente</a>
+					<a href="?page={{ registrosConFechas.paginator.num_pages }}&filtro={{ filtroOR }}&año={{ filtroAño }}&resp={{ filtroResp }}" role="button" class="bg-inm-rojo-200 hover:bg-inm-rojo-300 text-white py-1 px-3 rounded">Ultima &raquo;</a>
+				{% endif %}
+			</span>
+		</div>
+
+		<script>
+      function toggleModal() {
+        var modal = document.getElementById("notificationModal");
+        if (modal.style.display === "none" || modal.style.display === "") {
+          modal.style.display = "flex";
+        } else {
+          modal.style.display = "none";
+        }
+      }
+    </script>
+
+		<script>
+			var closeButtons = document.getElementsByClassName("close");
+			for (var i = 0; i < closeButtons.length; i++) {
+				closeButtons[i].onclick = function () {
+					var modal = this.parentElement.parentElement;
+					modal.style.display = "none";
+				}
+			}
+		</script>
+
+		<script src="https://code.jquery.com/jquery-latest.js"></script>
+		
+		<script>
+
+
+			function myFunction(idInput) {
+				x1 = 0
+				var input, filter, table, tr, td, i, txtValue, conteo;
+				input = document.getElementById(idInput);
+				table = document.getElementById("myTable");
+				tr = table.getElementsByTagName("tr");
+				
+				conteo = 0
+
+
+				for (i = 0; i < tr.length; i++) {
+					td = tr[i].getElementsByTagName("td")[x1];
+					if (td) {
+						txtValue = td.textContent || td.innerText;
+						if (tr[i].style.display == "") {
+							conteo++
+						}
+					} 
+				}
+				
+				document.getElementById("totales").innerHTML = "Acuerdos: " + conteo
+			}
+
+			function filterTable() {
+				var inputStatus = document.getElementById("searchStatus1").value.toUpperCase();
+				var inputClave = document.getElementById("searchClave1").value.toUpperCase();
+				//var inputFechaInicio = document.getElementById("searchFechaInicio").value;
+				//var inputFechaTermino = document.getElementById("searchFechaTermino").value;
+				var inputDescripcion = document.getElementById("searchDescripcion").value.toUpperCase();
+				var table = document.getElementById("myTable");
+				var tr = table.getElementsByTagName("tr");
+
+				for (var i = 1; i < tr.length; i++) {
+					var tdStatus = tr[i].getElementsByTagName("td")[6];
+					var tdClave = tr[i].getElementsByTagName("td")[0];
+					var tdArea = tr[i].getElementsByTagName("td")[5];
+					var tdFechaInicio = tr[i].getElementsByTagName("td")[1];
+					var tdFechaTermino = tr[i].getElementsByTagName("td")[2];
+					var tdDescripcion = tr[i].getElementsByTagName("td")[4];
+
+					if (tdStatus && tdClave && tdArea && tdFechaInicio && tdFechaTermino && tdDescripcion) {
+						var txtValueStatus = tdStatus.textContent || tdStatus.innerText;
+						var txtValueClave = (tdClave.textContent || tdClave.innerText).replace(/\s+/g,' ');
+						var txtValueArea = tdArea.textContent || tdArea.innerText;
+						//var txtValueFechaInicio = (tdFechaInicio.textContent || tdFechaInicio.innerText).replace(/\s+/g, ' ').trim();
+						//var txtValueFechaTermino = (tdFechaTermino.textContent || tdFechaTermino.innerText).replace(/\s+/g,' ').trim();
+						var txtValueDescripcion = tdDescripcion.textContent || tdDescripcion.innerText;
+
+						var matchesStatus = txtValueStatus.toUpperCase().indexOf(inputStatus) > -1;
+						var matchesClave = txtValueClave.toUpperCase().indexOf(inputClave) > -1;
+				
+						//var matchesFechaInicio = !inputFechaInicio || (inputFechaInicio == txtValueFechaInicio);
+						//var matchesFechaTermino = !inputFechaTermino || (inputFechaTermino === txtValueFechaTermino);
+						var matchesDescripcion = txtValueDescripcion.toUpperCase().indexOf(inputDescripcion) > -1;
+
+						if (matchesStatus && matchesClave && matchesDescripcion) {
+							tr[i].style.display = "";
+						} else {
+							tr[i].style.display = "none";
+						}
+					}
+				}
+
+				myFunction("searchStatus1")
+
+			}
+
+			function aplicarFiltros() {
+				var filtro1 = document.getElementById('filtroArea').value;
+				var filtro2 = document.getElementById('filtroAnual').value;
+				var filtro3 = document.getElementById('filtroArea2').value;
+				var currentUrl = window.location.href.split('?')[0]; // Obtener la URL base sin parámetros
+				var newUrl = currentUrl + '?';
+
+				if (filtro1) {
+					if (newUrl !== currentUrl + '?') {
+						newUrl += '&';
+					}
+					newUrl += 'filtro=' + filtro1;
+				}
+				if (filtro2) {
+					if (newUrl !== currentUrl + '?') {
+						newUrl += '&';
+					}
+					newUrl += 'año=' + filtro2;
+				}
+				if (filtro3) {
+					if (newUrl !== currentUrl + '?') {
+						newUrl += '&';
+					}
+					newUrl += 'resp=' + filtro3;
+				}
+				// Redirigir a la nueva URL con ambos filtros
+				window.location.href = newUrl;
+			}
+
+			document.getElementById('filtroArea').addEventListener('change', aplicarFiltros);
+			document.getElementById('filtroArea2').addEventListener('change', aplicarFiltros);
+			document.getElementById('filtroAnual').addEventListener('change', aplicarFiltros);
+			//document.getElementById('searchStatus1').addEventListener('input', myFunction("searchStatus1"));
+			document.getElementById('searchStatus1').addEventListener('input', filterTable());
+
+			{% comment %} function filtroOR(){
+					var valorSeleccionado = Array.from(document.getElementById("filtroArea").selectedOptions).map(option => option.value.toUpperCase());
+					var currentUrl = window.location.href.split('?')[0];
+
+					if (valorSeleccionado) {
+							window.location.href = currentUrl + '?filtro=' + selectedValue;
+					} else {
+							window.location.href = currentUrl; // Si no se selecciona nada, redirigir a la URL base
+					}
+			} {% endcomment %}
+
+			function openAreaModal() {
+				document.getElementById("areaModal").style.display = "block";
+			}
+
+			function closeAreaModal() {
+				document.getElementById("areaModal").style.display = "none";
+			}
+
+			function filterByArea(areaName) {
+				var table = document.getElementById("myTable");
+				var tr = table.getElementsByTagName("tr");
+
+				for (var i = 1; i < tr.length; i++) {
+					var td = tr[i].getElementsByTagName("td")[4];
+					if (td) {
+						var txtValue = td.textContent || td.innerText;
+						if (txtValue.indexOf(areaName) > -1) {
+							tr[i].style.display = "";
+						} else {
+							tr[i].style.display = "none";
+						}
+					}
+				}
+
+				closeAreaModal();
+
+			}
+
+			/*
+			document.getElementById('searchArea').addEventListener('change', function () {
+					var select = this;
+					var options = select.options;
+					var selected = [];
+
+					for (var i = 0; i < options.length; i++) {
+							if (options[i].selected) {
+									selected.push(options[i].value);
+							}
+					}
+
+					if (selected.includes('show_all')) {
+							for (var i = 0; i < options.length; i++) {
+									options[i].selected = true;
+							}
+					}
+
+					filterTable();
+			});
+			*/
+			function openModal(id) {
+				document.getElementById('modal' + id).style.display = 'block';
+			}
+
+			function closeModal(id) {
+				document.getElementById('modal' + id).style.display = 'none';
+			}
+
+
+			window.onclick = function (event) {
+				var modals = document.getElementsByClassName('modal');
+				for (var i = 0; i < modals.length; i++) {
+					if (event.target == modals[i]) {
+						modals[i].style.display = "none";
+					}
+				}
+			}
+			{% comment %} document.getElementById('pop').addEventListener('click', function (event) {
+					event.preventDefault();
+			}); {% endcomment %}
+		</script>
+	{% endif %}
+
+{% endblock content %}

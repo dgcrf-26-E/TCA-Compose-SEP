@@ -1,0 +1,79 @@
+services:
+  web:
+    profiles: ["dev", "server"]
+    container_name: TCAapp
+    restart: always
+    build: ./TCA
+    command: gunicorn tablero_control.wsgi:application --bind 0.0.0.0:8000 --reload
+    # command: python manage.py runserver 0.0.0.0:8000
+    expose:
+      - 8000
+    env_file:
+      - .env.dev
+    links:
+      - db
+    volumes:
+      - ./media_volume:/src/TCA/data/media
+      - ./static_volume:/src/TCA/data/static
+      - ./TCA/estadistica:/src/TCA/estadistica
+      - ./TCA/usuarios:/src/TCA/usuarios
+      - ./TCA/dashboard:/src/TCA/dashboard
+      - ./TCA/supervision:/src/TCA/supervision
+      - ./TCA/tablero_control:/src/TCA/tablero_control
+      - ./TCA/panel:/src/TCA/panel
+      - ./TCA/zdata:/src/TCA/zdata
+
+  db:
+    profiles: ["dev", "server"]
+    container_name: databasePG
+    restart: always
+    image: postgres:16.4-alpine
+    shm_size: 128mb
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env.db
+
+  nginx:
+    profiles: ["dev", "server"]
+    container_name: TcaNginx
+    build: ./nginx
+    expose:
+      - 80
+    ports:
+      - 8000:80
+    links:
+      - web
+    volumes:
+      - ./static_volume:/src/TCA/data/static
+      - ./media_volume:/src/TCA/data/media
+    environment:
+      - VIRTUAL_HOST=acuerdos.dgcor.com, www.acuerdos.dgcor.com
+      - LETSENCRYPT_HOST=acuerdos.dgcor.com, www.acuerdos.dgcor.com
+      - LETSENCRYPT_EMAIL=dgcor.rui23@gmail.com
+
+  nginx-proxy:
+    profiles: ["server"]
+    image: jwilder/nginx-proxy
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./certificados:/etc/nginx/certs:ro
+      - /etc/nginx/vhost.d
+      - /usr/share/nginx/html
+      - ./proxy-ngx/adjust.conf:/etc/nginx/conf.d/adjust.conf:ro
+    labels:
+      - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
+
+  letsencrypt:
+    profiles: ["server"]
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    restart: always
+    volumes:
+      - ./certificados:/etc/nginx/certs:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    volumes_from:
+      - nginx-proxy:rw
