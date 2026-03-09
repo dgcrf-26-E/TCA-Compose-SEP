@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.db.models import Max
 # from usuarios.models import usuarioL
 from usuarios.models import UsuarioP
-from usuarios.models import Registro, Acciones, Notificacion,Area, Rubro, Mensaje
+from usuarios.models import Registro, Acciones, Notificacion, Area, Rubro, Mensaje, Estados, Oficina
 from datetime import datetime, timedelta, timezone
 from .forms import RegistroConAccionesYPruebasForm, MensajeForm, AccionesForm, RegistroConAccionesFORM, CargarArchivoForm
 from django.forms import inlineformset_factory
@@ -78,9 +78,9 @@ def dashboard(request):
             
             # print(f"registros {registros.count()}")
         else:
-            registros_area = Registro.objects.filter(area=userDataI[0].OR)
+            registros_area = Registro.objects.filter(area=userDataI[0].oficina)
             registros_acciones_area2 = Registro.objects.filter(
-                accionR__area2=userDataI[0].OR
+                accionR__area2=userDataI[0].oficina
             )
 
             registros = registros_area | registros_acciones_area2
@@ -192,7 +192,7 @@ def dashboard(request):
         else:
             return render(request, "dashboard/dashboard.html", context)
             # template = 'home_pc.html'
-        return render(request, template)
+        return render(request, "dashboard/dashboard.html")
 
         # return render(request, "dashboard/dashboard.html", context)
 
@@ -316,8 +316,13 @@ def crear_registro(request):
     else:
         registro_form = RegistroConAccionesYPruebasForm()
 
+    estados = Estados.objects.all()
+    oficinas = Oficina.objects.all()
+
     return render(request, 'dashboard/crear_registro.html', {
         'registro_form': registro_form,
+        'estados': estados,
+        'oficinas': oficinas,
     })
 
 
@@ -662,9 +667,9 @@ def paginarRegistros(request):
         if userDataI[0].tipo == "1":
             registros = Registro.objects.all().order_by('fecha_termino')
         else:
-            registros_area = Registro.objects.filter(area=userDataI[0].OR).order_by('fecha_termino')
+            registros_area = Registro.objects.filter(area=userDataI[0].oficina).order_by('fecha_termino')
             registros_acciones_area2 = Registro.objects.filter(
-                accionR__area2=userDataI[0].OR
+                accionR__area2=userDataI[0].oficina
             ).order_by('fecha_termino')
 
             registros = registros_area | registros_acciones_area2
@@ -758,7 +763,7 @@ def generarNotificacion(idRegistro, mensaje, idUser):
         if auxOR not in filtrarA:
             filtrarA.append(auxOR)
 
-    usuarios_del_area = UsuarioP.objects.filter(OR__in=filtrarA)
+    usuarios_del_area = UsuarioP.objects.filter(oficina__in=filtrarA)
     # print(usuarios_del_area)
 
     usuarios_del_area = usuarios_del_area.exclude(idUser=idUser)
@@ -772,7 +777,8 @@ def generarNotificacion(idRegistro, mensaje, idUser):
             noti.leido = False
             noti.save()
         else:
-            Notificacion.objects.create(user=usuarioC.user, mensaje=mensaje, leido = False, registro_id=idRegistro)
+            registro_obj = Registro.objects.get(idRegistro=idRegistro)
+            Notificacion.objects.create(user=usuarioC.user, mensaje=mensaje, leido = False, registro=registro_obj)
 
         # notifi, created = Notificacion.objects.update_or_create(
         #     mensaje=mensaje,

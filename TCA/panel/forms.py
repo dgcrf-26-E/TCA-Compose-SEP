@@ -25,7 +25,7 @@ class UserForm(forms.ModelForm):
 class UsuarioPForm(forms.ModelForm):
     class Meta:
         model = UsuarioP
-        fields = ['nombre', 'apellido', 'OR','tipo']
+        fields = ['nombre', 'apellido', 'oficina','tipo']
     
 class AccessKeyForm(forms.Form):
     key = forms.CharField(
@@ -36,7 +36,7 @@ class AccessKeyForm(forms.Form):
 class UsuarioPForm(forms.ModelForm):
     class Meta:
         model = UsuarioP
-        fields = ['nombre', 'apellido', 'OR','tipo']
+        fields = ['nombre', 'apellido', 'oficina','tipo']
 
 class RubroForm(forms.ModelForm):
     class Meta:

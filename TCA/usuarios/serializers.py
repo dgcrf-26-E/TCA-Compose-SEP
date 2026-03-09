@@ -19,6 +19,6 @@ class UserGetSerializerC(ModelSerializer):
 			'nombre',
 			'apellido',
 			'password',
-			'estado',
+			'oficina',
 			'tipo',
 			]

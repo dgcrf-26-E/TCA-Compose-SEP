@@ -141,7 +141,7 @@
     </div> {% endcomment %}
 
     <div class="p-5 flex items-center justify-center">
-        <form class="w-full" method="post">
+        <form class="w-full" method="post" id="registro-form">
             {% csrf_token %}
             <div class="colorRectangulo rounded-xl border-3 p-6 w-full">
                 <div class="text-center mb-4">
@@ -149,157 +149,381 @@
                 </div>
                 <div class="text-center mb-4">
                     <div class="p-4 rounded-lg flex justify-between">
+                        <!-- Columna 1 -->
                         <div class="flex-1 text-center">
         
                             <div class="px-2 flex flex-col space-y-2">
-                                <label for="id_claveAcuerdo">Clave de Acuerdo:</label>
-                                <input name="claveAcuerdo" id="id_claveAcuerdo" type="text" class="text-center border border-gray-300 rounded-full p-2 text-12pt" placeholder="00/OR/MES/Año">
-                                <!-- <textarea name="claveAcuerdo" cols="40" rows="10" required id="id_claveAcuerdo">Clave de Acuerdo</textarea> -->
+                                <label for="{{ registro_form.claveAcuerdo.id_for_label }}">{{ registro_form.claveAcuerdo.label }}:</label>
+                                {{ registro_form.claveAcuerdo }}
+                                <div class="text-red-500 text-sm">{{ registro_form.claveAcuerdo.errors }}</div>
                             </div>
                             
-                            <div class="py-4 rounded-lg border-3 p-2 w-full">
-                                <h1 class="colorH2">Fechas:</h1>
+                            <div class="py-4 rounded-lg border-3 p-2 w-full mt-2">
+                                <h1 class="colorH1" style="font-size: 18px; color: white; margin-bottom: 10px;">Fechas:</h1>
                                 <div class="p-2 rounded-lg flex justify-between">
         
                                     <div class="px-2 flex-1 text-center">
                                         <div class="flex flex-col space-y-2">
-                                            <label for="id_fecha_inicio">Inicio:</label>
-                                            <input class="text-center" type="datetime" name="fecha_inicio" required id="id_fecha_inicio">
+                                            <label for="{{ registro_form.fecha_inicio.id_for_label }}">Inicio:</label>
+                                            {{ registro_form.fecha_inicio }}
                                         </div>
                                     </div>
         
                                     <div class="px-2 flex-1 text-center">
                                         <div class="flex flex-col space-y-2">
-                                            <label for="id_fecha_termino">Termino:</label>
-                                            <input class="text-center" type="datetime" name="fecha_termino" required id="id_fecha_termino">
+                                            <label for="{{ registro_form.fecha_termino.id_for_label }}">Termino:</label>
+                                            {{ registro_form.fecha_termino }}
                                         </div>
                                     </div>
         
                                 </div>
                             </div>
         
-                            <div class="px-2 flex-1 text-center">
+                            <div class="px-2 flex-1 text-center mt-2">
                                 <div class="flex flex-col space-y-2">
-                                    <label for="id_rubro">Rubro:</label>
-                                
-                                        <select name="rubro" size="6" required id="id_rubro" multiple>
-                                            {% for area in registro_form.fields.rubro.queryset %}
-                                                <option value="{{ area.pk }}"
-                                                    {% if area.pk in registro_form.initial.rubro %} selected{% endif %}>
-                                                    {{ area.pk }}, {{ area.tipo }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
+                                    <label for="{{ registro_form.rubro.id_for_label }}">{{ registro_form.rubro.label }}:</label>
+                                    {{ registro_form.rubro }}
                                 </div>
                             </div>
 
-                            <div class="px-2 flex-1 text-center">
+                            <div class="px-2 flex-1 text-center mt-2">
                                 <div class="flex flex-col space-y-2">
-                                    <label for="id_periodo">Periodo:</label>
-                                
-                                        <select name="periodo" size="3" required id="id_periodo" multiple>
-                                            {% for areass in registro_form.fields.periodo.queryset %}
-                                                <option value="{{ areass.pk }}"
-                                                    {% if areass.pk in registro_form.initial.periodo %} selected{% endif %}>
-                                                    {{ areass.pk }}, {{ areass.desc }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
+                                    <label for="{{ registro_form.periodo.id_for_label }}">{{ registro_form.periodo.label }}:</label>
+                                    {{ registro_form.periodo }}
                                 </div>
                             </div>
         
                         </div>
+                        
+                        <!-- Columna 2 -->
                         <div class="flex-1 text-center">
                             <div class="flex-1 text-center">
         
                                 <div class="px-2 flex flex-col space-y-2">
-                                    <label for="id_area">OR:</label>
-                                    <select name="area" size="7" required id="id_area" multiple>
-                                        {% for areass in registro_form.fields.area.queryset %}
-                                            {% if areass.pk < 33 %}
-                                                <option value="{{ areass.pk }}"
-                                                    {% if areass.pk in registro_form.initial.area %} selected{% endif %}>
-                                                    {{ areass.pk }}, {{ areass.nickname }}
-                                                </option>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </select>
+                                    <label>{{ registro_form.area.label }}:</label>
+                                    <div id="area-tags" class="flex flex-wrap gap-2 mb-2 justify-center">
+                                        <!-- Tags showing selected areas will appear here -->
+                                    </div>
+                                    <button type="button" onclick="openOfficeModal('area')" class="bg-white text-emerald-900 rounded-full py-2 px-4 font-semibold hover:bg-gray-100 transition shadow">
+                                        Seleccionar Plantel / Centro
+                                    </button>
+                                    <div style="display:none;">{{ registro_form.area }}</div>
+                                    <div class="text-red-500 text-sm">{{ registro_form.area.errors }}</div>
                                 </div>
         
-                                <div class="px-2 py-10 flex flex-col space-y-2">
-                                    <label for="id_accion1_area2">Áreas Responsables:</label>
-                                    <select name="accion1_area2" size="7" required id="id_accion1_area2" multiple>
-                                        {% for areass in registro_form.fields.accion1_area2.queryset %}
-                                            <option value="{{ areass.pk }}"
-                                                {% if areass.pk in registro_form.initial.accion1_area2 %} selected{% endif %}>
-                                                {{ areass.pk }}, {{ areass.nickname }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
+                                <div class="px-2 py-10 flex flex-col space-y-2 mt-4">
+                                    <label>{{ registro_form.accion1_area2.label }}:</label>
+                                    <div id="area2-tags" class="flex flex-wrap gap-2 mb-2 justify-center">
+                                        <!-- Tags showing selected areas will appear here -->
+                                    </div>
+                                    <button type="button" onclick="openOfficeModal('area2')" class="bg-white text-emerald-900 rounded-full py-2 px-4 font-semibold hover:bg-gray-100 transition shadow">
+                                        Seleccionar Áreas Responsables
+                                    </button>
+                                    <div style="display:none;">{{ registro_form.accion1_area2 }}</div>
+                                    <div class="text-red-500 text-sm">{{ registro_form.accion1_area2.errors }}</div>
                                 </div>
-        
         
                             </div>
                         </div>
+                        
+                        <!-- Columna 3 -->
                         <div class="flex-1 text-center">
 
                             <div class="px-2 py-4 flex flex-col space-y-2">
-                                <label for="id_accion1_antecedente">Hallazgo(s):</label>
-                                <textarea name="accion1_antecedente" cols="30" rows="5" required id="id_accion1_antecedente"></textarea>
+                                <label for="{{ registro_form.accion1_antecedente.id_for_label }}">{{ registro_form.accion1_antecedente.label }}:</label>
+                                {{ registro_form.accion1_antecedente }}
                             </div>
         
-                            <div class="px-2 py-4 flex flex-col space-y-2">
-                                <label for="id_accion1_descripcion">Descripción:</label>
-                                <textarea name="accion1_descripcion" cols="30" rows="5" required id="id_accion1_descripcion"></textarea>
+                            <div class="px-2 py-4 flex flex-col space-y-2 mt-4">
+                                <label for="{{ registro_form.accion1_descripcion.id_for_label }}">{{ registro_form.accion1_descripcion.label }}:</label>
+                                {{ registro_form.accion1_descripcion }}
                             </div>
         
                         </div>
                     </div>
                 </div>
-                <div class="text-center">
-                    <button class="py-3 px-6 mx-1 bg-inm-marron-200 hover:bg-inm-marron-100 rounded-xl text-white">Guardar Acuerdo</button>
+                <div class="text-center mt-6">
+                    <button type="submit" class="py-3 px-10 mx-1 bg-inm-marron-200 hover:bg-inm-marron-100 rounded-xl text-white font-bold shadow-lg transform transition active:scale-95">Guardar Acuerdo</button>
                 </div>
             </div>
         </form>
     </div>
 
+    <!-- Modal for Office Selection -->
+    <div id="officeModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col" style="height: 80vh;">
+            <div class="bg-emerald-900 p-4 text-white flex justify-between items-center">
+                <h2 id="modalTitle" class="text-xl font-bold">Seleccionar Oficinas</h2>
+                <button onclick="closeOfficeModal()" class="text-white hover:text-gray-300">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="flex-1 flex overflow-hidden">
+                <!-- States Column -->
+                <div class="w-1/4 border-r bg-gray-50 overflow-y-auto p-2">
+                    <h3 class="font-bold text-gray-700 mb-2 px-2 border-b pb-1">Estados</h3>
+                    <div id="stateList" class="space-y-1">
+                        {% for estado in estados %}
+                        <button onclick="filterOfficesByState('{{ estado.id }}', this)" class="state-btn w-full text-left px-3 py-2 rounded-lg hover:bg-emerald-100 transition text-gray-700 font-medium">
+                            {{ estado.nombre_completo }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
 
-    
+                <!-- Offices Grid -->
+                <div class="flex-1 flex flex-col p-4 overflow-hidden">
+                    <div class="mb-4">
+                        <input type="text" id="officeSearch" onkeyup="filterModalSearch()" placeholder="Buscar oficina..." class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div id="officeList" class="flex-1 overflow-y-auto grid grid-cols-2 gap-3 content-start">
+                        <!-- Offices populated by JS -->
+                        <div class="col-span-2 text-center text-gray-500 py-10">Selecciona un estado para ver las oficinas</div>
+                    </div>
+                </div>
+
+                <!-- Selection Sidebar -->
+                <div class="w-1/4 bg-gray-50 border-l p-4 flex flex-col overflow-hidden">
+                    <h3 class="font-bold text-gray-700 mb-2 border-b pb-1">Seleccionados</h3>
+                    <div id="modalSelectedList" class="flex-1 overflow-y-auto space-y-2 mt-2">
+                        <!-- Selected offices icons/list -->
+                    </div>
+                    <div class="mt-4 pt-4 border-t">
+                        <button onclick="confirmSelection()" class="w-full bg-emerald-700 text-white rounded-lg py-2 font-bold hover:bg-emerald-800 transition">
+                            Confirmar Selección
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .state-btn.active {
+            background-color: #064e3b !important;
+            color: white !important;
+        }
+        .office-card {
+            border: 1px solid #e5e7eb;
+            padding: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .office-card:hover {
+            border-color: #059669;
+            background-color: #ecfdf5;
+        }
+        .office-card.selected {
+            border-color: #059669;
+            background-color: #d1fae5;
+            box-shadow: 0 0 0 2px #059669;
+        }
+        .tag-pill {
+            background-color: white;
+            color: #064e3b;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            border: 1px solid #064e3b;
+        }
+    </style>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script>
+        // Data from Django
+        const officesData = [
+            {% for oficina in oficinas %}
+            {
+                id: "{{ oficina.id }}",
+                name: "{{ oficina.sede }}",
+                abrev: "{{ oficina.abrev }}",
+                state_id: "{{ oficina.estado.id }}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        let currentTarget = ''; // 'area' or 'area2'
+        let selectedOfficesMapping = {
+            'area': [],
+            'area2': []
+        };
+        let modalSelections = [];
+
         $(document).ready(function() {
-            $("#id_fecha_inicio").datepicker({
+            // Initialize Datepickers
+            $("#id_fecha_inicio, #id_fecha_termino").datepicker({
                 dateFormat: 'dd/mm/yy',
                 dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
                 monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
                 firstDay: 1,
                 prevText: 'Anterior',
                 nextText: 'Siguiente',
-                currentText: 'Hoy',
-                closeText: 'Cerrar',
-                showButtonPanel: false,
-                buttonText: 'Seleccionar fecha',
-                showAnim: 'slideDown',
-                showOtherMonths: true, 
-                selectOtherMonths: true 
+                showAnim: 'slideDown'
             });
-    
-            $("#id_fecha_termino").datepicker({
-                dateFormat: 'dd/mm/yy', 
-                dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
-                monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-                prevText: 'Anterior',
-                nextText: 'Siguiente',
-                currentText: 'Hoy',
-                closeText: 'Cerrar',
-                showButtonPanel: false,
-                buttonText: 'Seleccionar fecha',
-                showAnim: 'slideDown',
-                showOtherMonths: true,
-                selectOtherMonths: true
-            });
+
+            // Initial Sync from hidden selects if any (usually empty for new)
+            syncFromSelects();
         });
+
+        function openOfficeModal(target) {
+            currentTarget = target;
+            document.getElementById('modalTitle').innerText = target === 'area' ? 'Seleccionar Plantel / Centro' : 'Seleccionar Áreas Responsables';
+            modalSelections = [...selectedOfficesMapping[target]];
+            renderModalSelections();
+            document.getElementById('officeModal').classList.remove('hidden');
+        }
+
+        function closeOfficeModal() {
+            document.getElementById('officeModal').classList.add('hidden');
+            // Clear search and filters
+            document.getElementById('officeSearch').value = '';
+            document.querySelectorAll('.state-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('officeList').innerHTML = '<div class="col-span-2 text-center text-gray-500 py-10">Selecciona un estado para ver las oficinas</div>';
+        }
+
+        function filterOfficesByState(stateId, btn) {
+            document.querySelectorAll('.state-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const filtered = officesData.filter(off => off.state_id === stateId);
+            renderOfficeGrid(filtered);
+        }
+
+        function renderOfficeGrid(offices) {
+            const list = document.getElementById('officeList');
+            list.innerHTML = '';
+            
+            offices.forEach(off => {
+                const isSelected = modalSelections.includes(off.id);
+                const div = document.createElement('div');
+                div.className = `office-card ${isSelected ? 'selected' : ''}`;
+                div.innerHTML = `
+                    <div class="font-bold text-emerald-900">${off.abrev}</div>
+                    <div class="text-xs text-gray-600">${off.name}</div>
+                `;
+                div.onclick = () => toggleModalSelection(off.id, div);
+                list.appendChild(div);
+            });
+        }
+
+        function toggleModalSelection(officeId, element) {
+            const index = modalSelections.indexOf(officeId);
+            if (index > -1) {
+                modalSelections.splice(index, 1);
+                element.classList.remove('selected');
+            } else {
+                modalSelections.push(officeId);
+                element.classList.add('selected');
+            }
+            renderModalSelections();
+        }
+
+        function renderModalSelections() {
+            const list = document.getElementById('modalSelectedList');
+            list.innerHTML = '';
+            
+            modalSelections.forEach(id => {
+                const office = officesData.find(o => o.id === id);
+                if (office) {
+                    const div = document.createElement('div');
+                    div.className = 'flex justify-between items-center bg-emerald-50 p-2 rounded-lg border border-emerald-200';
+                    div.innerHTML = `
+                        <span class="text-sm font-semibold">${office.abrev}</span>
+                        <button onclick="removeModalSelection('${id}')" class="text-red-500 hover:text-red-700">×</button>
+                    `;
+                    list.appendChild(div);
+                }
+            });
+        }
+
+        function removeModalSelection(id) {
+            modalSelections = modalSelections.filter(mid => mid !== id);
+            renderModalSelections();
+            // Update grid if visible
+            const cards = document.querySelectorAll('.office-card');
+            cards.forEach(card => {
+                if (card.innerText.includes(officesData.find(o => o.id === id).abrev)) {
+                    card.classList.remove('selected');
+                }
+            });
+        }
+
+        function filterModalSearch() {
+            const query = document.getElementById('officeSearch').value.toLowerCase();
+            const filtered = officesData.filter(off => 
+                off.name.toLowerCase().includes(query) || 
+                off.abrev.toLowerCase().includes(query)
+            );
+            renderOfficeGrid(filtered);
+            // Deselect states when searching globally
+            document.querySelectorAll('.state-btn').forEach(b => b.classList.remove('active'));
+        }
+
+        function confirmSelection() {
+            selectedOfficesMapping[currentTarget] = [...modalSelections];
+            syncToSelects(currentTarget);
+            renderTags(currentTarget);
+            closeOfficeModal();
+        }
+
+        function syncToSelects(target) {
+            const selectId = target === 'area' ? 'id_area' : 'id_accion1_area2';
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            
+            // Unselect all
+            for (let i = 0; i < select.options.length; i++) {
+                select.options[i].selected = false;
+            }
+            
+            // Select ones in mapping
+            selectedOfficesMapping[target].forEach(id => {
+                const option = Array.from(select.options).find(opt => opt.value === id);
+                if (option) option.selected = true;
+            });
+        }
+
+        function syncFromSelects() {
+            ['area', 'area2'].forEach(target => {
+                const selectId = target === 'area' ? 'id_area' : 'id_accion1_area2';
+                const select = document.getElementById(selectId);
+                if (select) {
+                    selectedOfficesMapping[target] = Array.from(select.selectedOptions).map(opt => opt.value);
+                    renderTags(target);
+                }
+            });
+        }
+
+        function renderTags(target) {
+            const tagContainer = document.getElementById(`${target}-tags`);
+            tagContainer.innerHTML = '';
+            
+            selectedOfficesMapping[target].forEach(id => {
+                const office = officesData.find(o => o.id === id);
+                if (office) {
+                    const tag = document.createElement('div');
+                    tag.className = 'tag-pill';
+                    tag.innerHTML = `
+                        <span>${office.abrev}</span>
+                        <button type="button" onclick="removeTag('${target}', '${id}')" class="hover:text-red-500 font-bold ml-1">×</button>
+                    `;
+                    tagContainer.appendChild(tag);
+                }
+            });
+        }
+
+        function removeTag(target, id) {
+            selectedOfficesMapping[target] = selectedOfficesMapping[target].filter(oid => oid !== id);
+            syncToSelects(target);
+            renderTags(target);
+        }
     </script>
       
     

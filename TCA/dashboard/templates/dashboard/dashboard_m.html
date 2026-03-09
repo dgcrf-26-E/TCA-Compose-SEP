@@ -216,7 +216,7 @@
             <p><strong>Areas responsables:</strong><br>
               {% for accion in data.registro.accionR.all %}
 								{% for area2 in accion.area2.all %}
-									- {{ area2.nickname }}
+									- {{ area2.abrev }}
 								{% endfor %}
 							{% endfor %}
             </p>

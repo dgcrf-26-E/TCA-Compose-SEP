@@ -1,84 +1,91 @@
 <!DOCTYPE html>
 {% load static %}
 <html lang="es">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{% block title %}{% endblock title %}</title>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{% static 'js/tailwind.config.js' %}"></script>
+  <title>{% block title %}{% endblock title %}</title>
 
-    <!-- Estilos adicionales -->
-    {% block styles %}{% endblock styles %}
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="{% static 'js/tailwind.config.js' %}"></script>
 
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+  <!-- Estilos adicionales -->
+  {% block styles %}{% endblock styles %}
 
-      h1 {
-        font-size: 40px;
-        font-weight: bold;
-      }
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
-      body {
-        font-family: 'Montserrat';
-      }
-    </style>
-  </head>
+    h1 {
+      font-size: 40px;
+      font-weight: bold;
+    }
 
-  <body class="flex flex-col min-h-screen bg-[url('{% static 'imgs/fondo.png' %}')] bg-no-repeat bg-center bg-fixed bg-cover">
+    body {
+      font-family: 'Montserrat';
+    }
+  </style>
+</head>
 
-    <!-- HEADER imagen superior -->
-    <header class="bg-[rgba(150,150,150,1)]">
-      <div class="text-[#969699] -mb-[30px]">ßC</div>
+<body
+  class="flex flex-col min-h-screen bg-[url('{% static 'imgs/fondo.png' %}')] bg-no-repeat bg-center bg-fixed bg-cover">
 
-      <div class="flex items-center justify-between">
-        <div class="w-3/4 text-center p-4 lg:p-0 m-auto">
-          <a href="/">
-            <img src="{% static 'icons/banner_TCA.png' %}" alt="Logo Completo"
-                 class="scale-[1.3] sm:scale-[1.1] lg:scale-[0.6]">
-          </a>
-        </div>
+  <!-- HEADER imagen superior -->
+  <header class="bg-[rgba(98,19,51,1)]">
+    <div class="text-[#969699] -mb-[30px]">C</div>
+
+    <div class="flex items-center justify-between">
+      <div class="w-3/4 text-center p-4 lg:p-0 m-auto">
+        <a href="/">
+          <img src="{% static 'icons/banner_TCA.png' %}" alt="Logo Completo"
+            class="scale-[1.3] sm:scale-[1.1] lg:scale-[0.6]">
+        </a>
       </div>
-    </header>
+    </div>
+  </header>
 
-    {% comment %} Botones superiores {% endcomment %}
-    {% if request.user.is_authenticated %}
-      <div id="header-button" class="flex flex-wrap justify-center items-center gap-4 p-2 md:flex md:justify-center md:mt-4 md:space-x-2 ">
-        <a href="{% url 'dashboard' %}" class="bg-inm-gris-100 text-white px-3 py-2 lg:px-6 lg:py-3 rounded-xl hover:bg-inm-verde-200">Panel de Control</a>
-        {% block estadistica %}{% endblock estadistica %}
-        <a href="{% url 'logout' %}" class="bg-inm-rojo-300 text-white px-3 py-2 lg:px-6 lg:py-3 rounded-xl hover:bg-inm-rojo-100">Cerrar sesión</a>
+  {% comment %} Botones superiores {% endcomment %}
+  {% if request.user.is_authenticated %}
+  <div id="header-button"
+    class="flex flex-wrap justify-center items-center gap-4 p-2 md:flex md:justify-center md:mt-4 md:space-x-2 ">
+    <a href="{% url 'dashboard' %}"
+      class="bg-inm-gris-100 text-white px-3 py-2 lg:px-6 lg:py-3 rounded-xl hover:bg-inm-verde-200">Panel de
+      Control</a>
+    {% block estadistica %}{% endblock estadistica %}
+    <a href="{% url 'logout' %}"
+      class="bg-inm-rojo-300 text-white px-3 py-2 lg:px-6 lg:py-3 rounded-xl hover:bg-inm-rojo-100">Cerrar sesión</a>
+  </div>
+  <br>
+  {% else %}
+  <div class="flex justify-center mt-4 space-x-2">
+    <a href="{% url 'log-in' %}"
+      class="bg-inm-verde-100 text-white px-3 py-2 lg:px-6 lg:py-3 rounded-xl hover:bg-inm-verde-200">Ingresar</a>
+  </div>
+  {% endif %}
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="flex-grow flex flex-col pb-[100px]">
+    {% block content %}
+    {% endblock content %}
+  </main>
+
+  <!-- FOOTER -->
+  <footer id="footer-p" class="fixed bottom-0 bg-[#611232] min-h-[56px] w-full text-white font-light">
+    <div class="footer_container max-w-[2560px] m-auto px-[10px] flex justify-between items-center flex-wrap-reverse">
+      <div class="w-[180px] font-bold">
+        <img src="https://framework-gb.cdn.gob.mx/gobmx/img/logo_blanco.svg" width="150px" alt="logo"
+          class="my-[5px] mr-[150px]">
       </div>
+    </div>
+    <div class="bg-white bg-[url('https://framework-gb.cdn.gob.mx/gobmx/img/pleca.svg')] bg-repeat-x">
       <br>
-    {% else %}
-      <div class="flex justify-center mt-4 space-x-2">
-        <a href="{% url 'log-in' %}" class="bg-inm-verde-100 text-white px-3 py-2 lg:px-6 lg:py-3 rounded-xl hover:bg-inm-verde-200">Ingresar</a>
-      </div>
-    {% endif %}
+    </div>
+  </footer>
 
-    <!-- CONTENIDO PRINCIPAL -->
-    <main class="flex-grow flex flex-col pb-[100px]">
-      {% block content %}
-      {% endblock content %}
-    </main>
+  <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/tw-elements.umd.min.js"></script>
 
-    <!-- FOOTER -->
-    <footer id="footer-p" class="fixed bottom-0 bg-[#611232] min-h-[56px] w-full text-white font-light">
-      <div class="footer_container max-w-[2560px] m-auto px-[10px] flex justify-between items-center flex-wrap-reverse">
-        <div class="w-[180px] font-bold">
-          <img src="https://framework-gb.cdn.gob.mx/gobmx/img/logo_blanco.svg"
-               width="150px" alt="logo"
-               class="my-[5px] mr-[150px]">
-        </div>
-      </div>
-      <div class="bg-white bg-[url('https://framework-gb.cdn.gob.mx/gobmx/img/pleca.svg')] bg-repeat-x">
-        <br>
-      </div>
-    </footer>
+</body>
 
-    <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/tw-elements.umd.min.js"></script>
-
-  </body>
 </html>

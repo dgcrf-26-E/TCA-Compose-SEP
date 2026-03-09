@@ -41,10 +41,10 @@ def login_user(request):
                                         'nombre': datos_usuario.nombre,
                                         'apellido': datos_usuario.apellido,
                                         'password': 'ok',
-                                        'estado': datos_usuario.estado,
+                                        'oficina': datos_usuario.oficina.id if datos_usuario.oficina else None,
                                         'tipo': datos_usuario.tipo}
                     
-                    print(f" ${datos_usuario.nickname} ${datos_usuario.nombre} ${datos_usuario.apellido} ${datos_usuario.estado}")
+                    print(f" ${datos_usuario.nickname} ${datos_usuario.nombre} ${datos_usuario.apellido} ${datos_usuario.oficina}")
                     serializer_datos = UserGetSerializerC(nuevo_serializer)
                     return JsonResponse(serializer_datos.data, status = 200)
 
@@ -53,7 +53,7 @@ def login_user(request):
                                         'nombre': '',
                                         'apellido': '',
                                          'password': 'error',
-                                         'estado': '',
+                                         'oficina': None,
                                          'tipo': ''}
                     serializer_datos = UserGetSerializerC(nuevo_serializer)
                     return JsonResponse(serializer_datos.data, status = 200)
@@ -64,7 +64,7 @@ def login_user(request):
                                         'nombre': '',
                                         'apellido': '',
                                          'password': 'error',
-                                         'estado': '',
+                                         'oficina': None,
                                          'tipo': ''}
                 serializer_datos = UserGetSerializerC(nuevo_serializer)
                 return JsonResponse(serializer_datos.data, status = 200)
@@ -73,7 +73,7 @@ def login_user(request):
                                         'nombre': '',
                                         'apellido': '',
                                          'password': 'error',
-                                         'estado': '',
+                                         'oficina': None,
                                          'tipo': ''}
             serializer_datos = UserGetSerializerC(nuevo_serializer)
             return JsonResponse(serializer_datos.data, status = 200)
