@@ -6,30 +6,334 @@
 
 {% block styles %}
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<style>
+    .state-btn.active {
+        background-color: #064e3b !important;
+        color: white !important;
+    }
+    .office-card {
+        border: 1px solid #e5e7eb;
+        padding: 10px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .office-card:hover {
+        border-color: #059669;
+        background-color: #ecfdf5;
+    }
+    .office-card.selected {
+        border-color: #059669;
+        background-color: #d1fae5;
+        box-shadow: 0 0 0 2px #059669;
+    }
+    .tag-pill {
+        background-color: white;
+        color: #064e3b;
+        padding: 4px 12px;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        border: 1px solid #064e3b;
+    }
+    /* Estilo para los mensajes de ayuda de Django */
+    .helptext {
+        display: block;
+        margin-top: 5px;
+        font-size: 0.75rem;
+        color: #666;
+    }
+    /* Estilos base para inputs */
+    input[type="text"], input[type="password"], select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 2px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+</style>
 {% endblock styles %}
 
 {% block content %}
 
-  <div class="container mx-auto py-4">
-  <h1 class="text-2xl mb-4">
+  <div class="container mx-auto py-4 max-w-4xl">
+  <h1 class="text-2xl mb-4 font-bold text-center">
     {% if perfil_form.instance.pk %}Editar Usuario{% else %}Crear Usuario{% endif %}
   </h1>
-  <form method="post">
+  <form method="post" id="user-form">
     {% csrf_token %}
-    <fieldset class="mb-4">
-      <legend class="font-semibold">Datos de Cuenta</legend>
-      {{ user_form.as_p }}
-    </fieldset>
-    <h3 class="text-l mb-4 text-inm-rojo-200">
-      {% if perfil_form.instance.pk %}Dejar en blanco para no actualizar contraseña{% else %} {% endif %}
+    <div class="mb-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+      <h3 class="font-semibold text-lg mb-4">Datos de la Cuenta</h3>
+      <div class="mb-2 w-full max-w-sm mx-auto">
+        {{ user_form.as_p }}
+      </div>
+    </div>
+    <h3 class="text-sm mb-4 text-red-500 italic">
+      {% if perfil_form.instance.pk %}* Dejar en blanco para no actualizar contraseña{% else %} {% endif %}
     </h3>
-    <fieldset>
-      <legend class="font-semibold">Datos de Perfil</legend>
-      {{ perfil_form.as_p }}
+    <fieldset class="mb-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+      <legend class="font-semibold text-lg mb-4">Datos de Perfil</legend>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col">
+            <label for="{{ perfil_form.nombre.id_for_label }}" class="font-medium mb-1">{{ perfil_form.nombre.label }}:</label>
+            {{ perfil_form.nombre }}
+            <div class="text-red-500 text-sm mt-1">{{ perfil_form.nombre.errors }}</div>
+          </div>
+          
+          <div class="flex flex-col">
+            <label for="{{ perfil_form.apellido.id_for_label }}" class="font-medium mb-1">{{ perfil_form.apellido.label }}:</label>
+            {{ perfil_form.apellido }}
+            <div class="text-red-500 text-sm mt-1">{{ perfil_form.apellido.errors }}</div>
+          </div>
+    
+          <div class="flex flex-col">
+            <label for="{{ perfil_form.tipo.id_for_label }}" class="font-medium mb-1">{{ perfil_form.tipo.label }}:</label>
+            {{ perfil_form.tipo }}
+            <div class="text-red-500 text-sm mt-1">{{ perfil_form.tipo.errors }}</div>
+          </div>
+          
+          <div class="flex flex-col">
+            <label class="font-medium mb-1">{{ perfil_form.oficina.label }}:</label>
+            <div id="office-tags" class="flex flex-wrap gap-2 mb-2">
+                <!-- Selected office tag will appear here -->
+            </div>
+            <button type="button" onclick="openOfficeModal()" class="w-full bg-white text-emerald-900 border border-emerald-900 rounded-lg py-2 px-4 mt-auto font-semibold hover:bg-gray-100 transition shadow">
+                Seleccionar Oficina
+            </button>
+            <div style="display:none;">{{ perfil_form.oficina }}</div>
+            <div class="text-red-500 text-sm mt-1">{{ perfil_form.oficina.errors }}</div>
+          </div>
+      </div>
+      
     </fieldset>
-    <button type="submit" class="btn btn-success mt-4 text-white px-6 py-3 rounded-xl bg-inm-verde-100 hover:bg-inm-verde-200">Guardar</button>
-    <a href="{% url 'user_admin:usuario_list' %}" class="btn btn-secondary mt-4 text-white px-6 py-3 rounded-xl bg-inm-rojo-200 hover:bg-inm-rojo-300">Cancelar</a>
+    <div class="flex gap-4">
+        <button type="submit" class="btn btn-success text-white px-6 py-3 rounded-xl bg-inm-verde-100 hover:bg-inm-verde-200 shadow font-bold">Guardar Usuario</button>
+        <a href="{% url 'user_admin:usuario_list' %}" class="btn btn-secondary text-white px-6 py-3 rounded-xl bg-inm-rojo-200 hover:bg-inm-rojo-300 shadow font-bold text-center">Cancelar</a>
+    </div>
   </form>
 </div>
 
+<!-- Modal for Office Selection -->
+<div id="officeModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col" style="height: 80vh;">
+        <div class="bg-emerald-900 p-4 text-white flex justify-between items-center">
+            <h2 id="modalTitle" class="text-xl font-bold">Seleccionar Oficina</h2>
+            <button type="button" onclick="closeOfficeModal()" class="text-white hover:text-gray-300">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        
+        <div class="flex-1 flex overflow-hidden">
+            <!-- States Column -->
+            <div class="w-1/4 border-r bg-gray-50 overflow-y-auto p-2">
+                <h3 class="font-bold text-gray-700 mb-2 px-2 border-b pb-1">Estados</h3>
+                <div id="stateList" class="space-y-1">
+                    {% for estado in estados %}
+                    <button type="button" onclick="filterOfficesByState('{{ estado.id }}', this)" class="state-btn w-full text-left px-3 py-2 rounded-lg hover:bg-emerald-100 transition text-gray-700 font-medium">
+                        {{ estado.nombre_completo }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Offices Grid -->
+            <div class="flex-1 flex flex-col p-4 overflow-hidden">
+                <div class="mb-4">
+                    <input type="text" id="officeSearch" onkeyup="filterModalSearch()" placeholder="Buscar oficina..." class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div id="officeList" class="flex-1 overflow-y-auto grid grid-cols-2 gap-3 content-start">
+                    <!-- Offices populated by JS -->
+                    <div class="col-span-2 text-center text-gray-500 py-10">Selecciona un estado para ver las oficinas</div>
+                </div>
+            </div>
+
+            <!-- Selection Sidebar -->
+            <div class="w-1/4 bg-gray-50 border-l p-4 flex flex-col overflow-hidden">
+                <h3 class="font-bold text-gray-700 mb-2 border-b pb-1">Seleccionada</h3>
+                <div id="modalSelectedList" class="flex-1 overflow-y-auto space-y-2 mt-2">
+                    <!-- Selected office icon/list -->
+                </div>
+                <div class="mt-4 pt-4 border-t">
+                    <button type="button" onclick="confirmSelection()" class="w-full bg-emerald-700 text-white rounded-lg py-2 font-bold hover:bg-emerald-800 transition shadow">
+                        Confirmar Selección
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    // Data from Django
+    const officesData = [
+        {% for oficina in oficinas %}
+        {
+            id: "{{ oficina.id }}",
+            name: "{{ oficina.sede }}",
+            abrev: "{{ oficina.abrev }}",
+            state_id: "{{ oficina.estado.id }}",
+            state_corto: "{{ oficina.estado.corto }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    let selectedOfficeId = null; // Single selection
+    let modalSelection = null; // Single selection in modal
+
+    $(document).ready(function() {
+        // Initial Sync from hidden select
+        syncFromSelect();
+    });
+
+    function openOfficeModal() {
+        modalSelection = selectedOfficeId;
+        renderModalSelection();
+        document.getElementById('officeModal').classList.remove('hidden');
+    }
+
+    function closeOfficeModal() {
+        document.getElementById('officeModal').classList.add('hidden');
+        // Clear search and filters
+        document.getElementById('officeSearch').value = '';
+        document.querySelectorAll('.state-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('officeList').innerHTML = '<div class="col-span-2 text-center text-gray-500 py-10">Selecciona un estado para ver las oficinas</div>';
+    }
+
+    function filterOfficesByState(stateId, btn) {
+        document.querySelectorAll('.state-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        
+        const filtered = officesData.filter(off => off.state_id === stateId);
+        renderOfficeGrid(filtered);
+    }
+
+    function renderOfficeGrid(offices) {
+        const list = document.getElementById('officeList');
+        list.innerHTML = '';
+        
+        offices.forEach(off => {
+            const isSelected = modalSelection === off.id;
+            const div = document.createElement('div');
+            div.className = `office-card ${isSelected ? 'selected' : ''}`;
+            div.innerHTML = `
+                <div class="font-bold text-emerald-900">${off.abrev}</div>
+                <div class="text-xs text-gray-600">${off.name}</div>
+            `;
+            div.onclick = () => toggleModalSelection(off.id, div);
+            list.appendChild(div);
+        });
+    }
+
+    function toggleModalSelection(officeId, element) {
+        // SINGLE SELECTION logic
+        if (modalSelection === officeId) {
+            // Deselect
+            modalSelection = null;
+            element.classList.remove('selected');
+        } else {
+            // Remove previous selection visually
+            document.querySelectorAll('.office-card').forEach(card => card.classList.remove('selected'));
+            modalSelection = officeId;
+            element.classList.add('selected');
+        }
+        renderModalSelection();
+    }
+
+    function renderModalSelection() {
+        const list = document.getElementById('modalSelectedList');
+        list.innerHTML = '';
+        
+        if (modalSelection) {
+            const office = officesData.find(o => o.id === modalSelection);
+            if (office) {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center bg-emerald-50 p-2 rounded-lg border border-emerald-200';
+                div.innerHTML = `
+                    <span class="text-sm font-semibold">${office.abrev}</span>
+                    <button type="button" onclick="removeModalSelection()" class="text-red-500 hover:text-red-700">×</button>
+                `;
+                list.appendChild(div);
+            }
+        }
+    }
+
+    function removeModalSelection() {
+        modalSelection = null;
+        renderModalSelection();
+        // Update grid if visible
+        document.querySelectorAll('.office-card').forEach(card => card.classList.remove('selected'));
+    }
+
+    function filterModalSearch() {
+        const query = document.getElementById('officeSearch').value.toLowerCase();
+        const filtered = officesData.filter(off => 
+            off.name.toLowerCase().includes(query) || 
+            off.abrev.toLowerCase().includes(query)
+        );
+        renderOfficeGrid(filtered);
+        // Deselect states when searching globally
+        document.querySelectorAll('.state-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    function confirmSelection() {
+        selectedOfficeId = modalSelection;
+        syncToSelect();
+        renderTag();
+        closeOfficeModal();
+    }
+
+    function syncToSelect() {
+        const select = document.getElementById('id_oficina'); // The exact ID generated by Django forms
+        if (!select) return;
+        
+        // Unselect all
+        for (let i = 0; i < select.options.length; i++) {
+            select.options[i].selected = false;
+        }
+        
+        // Select the chosen one
+        if (selectedOfficeId) {
+            const option = Array.from(select.options).find(opt => opt.value === selectedOfficeId);
+            if (option) option.selected = true;
+        }
+    }
+
+    function syncFromSelect() {
+        const select = document.getElementById('id_oficina');
+        if (select && select.value) {
+            selectedOfficeId = select.value;
+            renderTag();
+        }
+    }
+
+    function renderTag() {
+        const tagContainer = document.getElementById(`office-tags`);
+        tagContainer.innerHTML = '';
+        
+        if (selectedOfficeId) {
+            const office = officesData.find(o => o.id === selectedOfficeId);
+            if (office) {
+                const tag = document.createElement('div');
+                tag.className = 'tag-pill';
+                tag.innerHTML = `
+                    <span>${office.state_corto} / ${office.abrev}</span>
+                    <button type="button" onclick="removeTag()" class="hover:text-red-500 font-bold ml-1">×</button>
+                `;
+                tagContainer.appendChild(tag);
+            }
+        }
+    }
+
+    function removeTag() {
+        selectedOfficeId = null;
+        syncToSelect();
+        renderTag();
+    }
+</script>
 {% endblock content %}

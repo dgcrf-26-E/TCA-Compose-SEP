@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.db.models import Max
 # from usuarios.models import usuarioL
 from usuarios.models import UsuarioP
-from usuarios.models import Registro, Acciones, Notificacion, Area, Rubro, Mensaje, Estados, Oficina
+from usuarios.models import Registro, Acciones, Notificacion, Area, Rubro, Mensaje, Estados, Oficina, Periodo
 from datetime import datetime, timedelta, timezone
 from .forms import RegistroConAccionesYPruebasForm, MensajeForm, AccionesForm, RegistroConAccionesFORM, CargarArchivoForm
 from django.forms import inlineformset_factory
@@ -51,12 +51,12 @@ def dashboard(request):
         # print(f"filtro {filtro}")
         # print(f"filtro {tiempo}")
 
-        consultarAreas = Area.objects.all()
+        consultarAreas = Oficina.objects.all()
         lista_años = [str(año) for año in range(2020, datetime.now().year + 1)]
 
         userDataI = UsuarioP.objects.filter(user__username=request.user)
         registrosConFechas = []
-        nombres_areas = [area.nickname for area in consultarAreas]
+        nombres_areas = [area.abrev for area in consultarAreas]
         areas_n = nombres_areas if len(nombres_areas) > 1 else None
 
         registros = Registro.objects.all()
@@ -65,8 +65,8 @@ def dashboard(request):
         formCargar1 = CargarArchivoForm()
         if userDataI[0].tipo == "1":
             if filtro in nombres_areas:
-                filtroB = Area.objects.get(nickname = filtro)
-                registros = registros.filter(area=filtroB.idArea)
+                filtroB = Oficina.objects.get(abrev = filtro)
+                registros = registros.filter(area=filtroB.id)
 
             if tiempo in lista_años:
                 print(f"filtro {tiempo}")
@@ -87,8 +87,8 @@ def dashboard(request):
             registros = registros.distinct()
 
             if filtro in nombres_areas:
-                filtroB = Area.objects.get(nickname = filtro)
-                registros = registros.filter(area=filtroB.idArea)
+                filtroB = Oficina.objects.get(abrev = filtro)
+                registros = registros.filter(area=filtroB.id)
 
             if tiempo in lista_años:
                 # print(f"filtro {tiempo}")
@@ -141,8 +141,8 @@ def dashboard(request):
             fecha_finalizacion = registro.fecha_finalizacion
 
             areas = registro.area.all()
-            areas_str = ', '.join(area.nickname for area in areas)
-            areas_name = ', '.join(area.name for area in areas)
+            areas_str = ', '.join(area.abrev for area in areas)
+            areas_name = ', '.join(area.sede for area in areas)
 
             dias = diferencia.days
             porcentaje = registro.porcentaje_avance
@@ -294,7 +294,11 @@ def crear_registro(request):
         userDataI = UsuarioP.objects.filter(user__username=request.user).first()
         registro_form = RegistroConAccionesYPruebasForm(request.POST)
         if registro_form.is_valid():
-            registro = registro_form.save()
+            ultimo_periodo = Periodo.objects.last()
+            registro = registro_form.save(commit=False)
+            registro.periodo = ultimo_periodo
+            registro.save()
+            registro_form.save_m2m()
 
             areas2 = registro_form.cleaned_data['accion1_area2']
             area = registro_form.cleaned_data['area']
@@ -309,7 +313,7 @@ def crear_registro(request):
             accion.save()
             registro.accionR.add(accion)
 
-            mensaje = f"Se ha creado un nuevo acuerdo: {claveA} en la {area[0].name}."
+            mensaje = f"Se ha creado un nuevo acuerdo: {claveA} en la {area[0].sede}."
             generarNotificacion(registro.idRegistro, mensaje, userDataI.idUser)
 
             return redirect('dashboard')
@@ -348,11 +352,16 @@ def editar_registro(request, id):
             accion.save()
 
             messages.success(request, "Guardado correctamente.")
+
+            estados = Estados.objects.all()
+            oficinas = Oficina.objects.all()
+            
             return render(request, 'dashboard/editar_registro.html', {
                 'registro_form': registro_form,
                 'accion_form': accion_form,
                 'dataU': userDataI,
-
+                'estados': estados,
+                'oficinas': oficinas,
             })
 
         else:
@@ -366,10 +375,15 @@ def editar_registro(request, id):
         registro_form = RegistroConAccionesFORM(instance=registro)
         accion_form = AccionesForm(instance=accion)
 
+    estados = Estados.objects.all()
+    oficinas = Oficina.objects.all()
+
     return render(request, 'dashboard/editar_registro.html', {
         'registro_form': registro_form,
         'accion_form': accion_form,
         'dataU': userDataI,
+        'estados': estados,
+        'oficinas': oficinas,
     })
 
 
@@ -658,7 +672,7 @@ def paginarRegistros(request):
     if request.method == 'GET':
         userDataI = UsuarioP.objects.filter(user__username=request.user)
         registrosConFechas = []
-        nombres_areas = [area.nickname for area in Area.objects.all()]
+        nombres_areas = [area.abrev for area in Oficina.objects.all()]
         areas_n = nombres_areas if len(nombres_areas) > 1 else None
     
 
@@ -694,8 +708,8 @@ def paginarRegistros(request):
             fecha_finalizacion = registro.fecha_finalizacion
 
             areas = registro.area.all()
-            areas_str = ', '.join(area.nickname for area in areas)
-            areas_name = ', '.join(area.name for area in areas)
+            areas_str = ', '.join(area.abrev for area in areas)
+            areas_name = ', '.join(area.sede for area in areas)
 
             dias = diferencia.days
             porcentaje = registro.porcentaje_avance
@@ -746,20 +760,21 @@ def generarNotificacion(idRegistro, mensaje, idUser):
     accionAcuerdo = Acciones.objects.filter(idRegistro=idRegistro).first()
     
     for area in accionAcuerdo.area2.all():
-        auxD = str(area.idArea)
+        auxD = str(area.id)
         if auxD not in filtrarA:
             filtrarA.append(auxD)
 
     # print(areaDGCOR)
-    areaDGCOR = Area.objects.filter(nickname="DGCOR").first()
-    auxDG = str(areaDGCOR.idArea)
-    if auxDG not in filtrarA:
-        filtrarA.append(auxDG)
+    areaDGCOR = Oficina.objects.filter(abrev="DGCFT").first()
+    if areaDGCOR:
+        auxDG = str(areaDGCOR.id)
+        if auxDG not in filtrarA:
+            filtrarA.append(auxDG)
     # print(filtrarA)
 
     for areas_enOR in registroI.area.all():
         print(areas_enOR)
-        auxOR = str(areas_enOR.idArea)
+        auxOR = str(areas_enOR.id)
         if auxOR not in filtrarA:
             filtrarA.append(auxOR)
 

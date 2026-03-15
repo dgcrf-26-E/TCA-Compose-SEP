@@ -6,19 +6,6 @@
 
 {% block styles %}
     <style>
-    .container {
-        width: 50%;
-        margin: 50px auto;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        border: 2px solid #f2eddf;
-        background-color: #235B4E;
-        opacity: 0.90;
-        color: rgb(0, 0, 0);
-        text-align: center;
-    }
-
     .colorRectangulo {
         border-radius: 15px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -39,17 +26,11 @@
         color: rgb(255, 255, 255);
     }
 
-    .container h1 {
-        font-size: 24px;
-        margin-bottom: 20px;
-        color: rgb(255, 255, 255);
-    }
-
     label {
         color: white;
     }
 
-    input[type="text"], input[type="date"], select, textarea {
+    input[type="text"], input[type="date"], select, textarea, input[type="number"] {
         width: 100%;
         padding: 10px;
         margin-bottom: 10px;
@@ -60,13 +41,12 @@
         background-color: white;
     }
 
-
     .ui-datepicker {
         font-family: Arial, sans-serif;
         font-size: 14px;
-        background-color: white;
-        border: 1px solid #ccc;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        background-color: white; /* Cambiar el fondo a blanco */
+        border: 1px solid #ccc; /* Agregar un borde */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Agregar sombra */
     }
 
     .ui-datepicker-header {
@@ -114,37 +94,29 @@
         cursor: pointer;
     }
 
-
     input[type="date"]::-webkit-datetime-edit {
         color: black;
     }
-    input[type="text"].text-12pt {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
 
-.success {
-    background-color: #235B4E;
-    color: white;
-    padding: 15px;
-    margin-bottom: 20px;
-    text-align: center;
-    border-radius: 5px;
-    font-size: 18px;
-}
+    .success {
+        background-color: #235B4E;
+        color: white;
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+        border-radius: 5px;
+        font-size: 18px;
+    }
 
-.error {
-    background-color: #C30E2E;
-    color: white;
-    padding: 15px;
-    margin-bottom: 20px;
-    text-align: center;
-    border-radius: 5px;
-    font-size: 18px;
-}
+    .error {
+        background-color: #C30E2E;
+        color: white;
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+        border-radius: 5px;
+        font-size: 18px;
+    }
 
     </style>
 {% endblock styles %}
@@ -155,8 +127,7 @@
 {% if dataU.0.tipo == "1" %}
     <div class="p-5 flex items-center justify-center">
 
-
-        <form class="w-full" method="post">
+        <form class="w-full" method="post" id="registro-form">
             {% if messages %}
             <div class="w-full mb-4" id="messages">
                 {% for message in messages %}
@@ -165,7 +136,8 @@
                     </div>
                 {% endfor %}
             </div>
-        {% endif %}
+            {% endif %}
+
             {% csrf_token %}
             <div class="colorRectangulo rounded-xl border-3 p-6 w-full">
                 <div class="text-center mb-4">
@@ -173,19 +145,29 @@
                 </div>
                 <div class="text-center mb-4">
                     <div class="p-4 rounded-lg flex justify-between">
+                        <!-- Columna 1 -->
                         <div class="flex-1 text-center">
-
-
-                            <div class="px-2 flex-1 text-center">
-                                <div class="flex flex-col space-y-2">
-                                    <label for="{{ registro_form.claveAcuerdo.id_for_label }}">Clave del Acuerdo:</label>
-                                    {{ registro_form.claveAcuerdo }}
+        
+                            <div class="px-2 flex flex-col space-y-2">
+                                <label>{{ registro_form.area.label }}:</label>
+                                <div id="area-tags" class="flex flex-wrap gap-2 mb-2 justify-center">
+                                    <!-- Tags showing selected areas will appear here -->
                                 </div>
+                                <button type="button" onclick="openOfficeModal('area')" class="bg-white text-emerald-900 rounded-full py-2 px-4 font-semibold hover:bg-gray-100 transition shadow">
+                                    Seleccionar Plantel / Centro
+                                </button>
+                                <div style="display:none;">{{ registro_form.area }}</div>
+                                <div class="text-red-500 text-sm">{{ registro_form.area.errors }}</div>
                             </div>
-                                                                          
+
+                            <div class="px-2 flex flex-col space-y-2 mt-6">
+                                <label for="{{ registro_form.claveAcuerdo.id_for_label }}">{{ registro_form.claveAcuerdo.label }}:</label>
+                                {{ registro_form.claveAcuerdo }}
+                                <div class="text-red-500 text-sm">{{ registro_form.claveAcuerdo.errors }}</div>
+                            </div>
                             
-                            <div class="py-4 rounded-lg border-3 p-2 w-full">
-                                <h1 class="colorH2">Fechas:</h1>
+                            <div class="py-4 rounded-lg border-3 p-2 w-full mt-2">
+                                <h1 class="colorH1" style="font-size: 18px; color: white; margin-bottom: 10px;">Fechas:</h1>
                                 <div class="p-2 rounded-lg flex justify-between">
         
                                     <div class="px-2 flex-1 text-center">
@@ -204,15 +186,8 @@
         
                                 </div>
                             </div>
-        
-                            <div class="px-2 flex-1 text-center">
-                                <div class="flex flex-col space-y-2">
-                                    <label for="{{ registro_form.rubro.id_for_label }}">Rubro:</label>
-                                    {{ registro_form.rubro }}
-                                </div>
-                            </div>
 
-                            <div class="px-2 flex-1 text-center">
+                            <div class="px-2 flex-1 text-center mt-6">
                                 <div class="flex flex-col space-y-2">
                                     <label for="{{ registro_form.periodo.id_for_label }}">Periodo:</label>
                                     {{ registro_form.periodo }}
@@ -221,103 +196,346 @@
         
                         </div>
                         
+                        <!-- Columna 2 -->
                         <div class="flex-1 text-center">
                             <div class="flex-1 text-center">
         
                                 <div class="px-2 flex flex-col space-y-2">
-                                    <label for="{{ registro_form.area.id_for_label }}">OR:</label>
-                                    {{ registro_form.area }}
+                                    <label>{{ accion_form.area2.label }}:</label>
+                                    <div id="area2-tags" class="flex flex-wrap gap-2 mb-2 justify-center">
+                                        <!-- Tags showing selected areas will appear here -->
+                                    </div>
+                                    <button type="button" onclick="openOfficeModal('area2')" class="bg-white text-emerald-900 rounded-full py-2 px-4 font-semibold hover:bg-gray-100 transition shadow">
+                                        Seleccionar Áreas Responsables
+                                    </button>
+                                    <div style="display:none;">{{ accion_form.area2 }}</div>
+                                    <div class="text-red-500 text-sm">{{ accion_form.area2.errors }}</div>
+                                </div>
+
+                                <div class="px-2 flex-1 text-center mt-6">
+                                    <div class="flex flex-col space-y-2">
+                                        <label for="{{ registro_form.rubro.id_for_label }}">{{ registro_form.rubro.label }}:</label>
+                                        {{ registro_form.rubro }}
+                                    </div>
+                                </div>
+
+                                <div class="px-2 flex-1 text-center mt-6">
+                                    <div class="flex flex-col space-y-2">
+                                        <label for="{{ registro_form.porcentaje_avance.id_for_label }}">Porcentaje de Avance:</label>
+                                        {{ registro_form.porcentaje_avance }}
+                                    </div>
+                                </div>
+
+                                <div class="px-2 flex-1 text-center mt-6">
+                                    <div class="flex flex-col space-y-2">
+                                        <label for="{{ registro_form.estado.id_for_label }}">Estatus:</label>
+                                        {{ registro_form.estado }}
+                                    </div>
                                 </div>
         
-                                <div class="px-2 py-10 flex flex-col space-y-2">
-                                    <label for="{{ accion_form.area2.id_for_label }}">Áreas Responsables:</label>
-                                    {{ accion_form.area2 }}
-                                </div>
-        
-        
-                            </div>
-                            <div class="px-2 flex flex-col space-y-2">
-                                <label for="{{ registro_form.porcentaje_avance.id_for_label }}">Porcentaje de Avance:</label>
-                                {{ registro_form.porcentaje_avance }}
-                            </div>
-                            
-                            
-                            <div class="px-2 flex flex-col space-y-2">
-                                <label for="{{ registro_form.estado.id_for_label }}">Estatus:</label>
-                                {{ registro_form.estado }}
                             </div>
                         </div>
+                        
+                        <!-- Columna 3 -->
                         <div class="flex-1 text-center">
 
-                            <div class="px-2 py-1 flex flex-col">
-                                <label for="{{ accion_form.descripcion.id_for_label }}">Hallazgo(s):</label>
+                            <div class="px-2 py-4 flex flex-col space-y-2">
+                                <label for="{{ accion_form.antecedente.id_for_label }}">{{ accion_form.antecedente.label }}:</label>
                                 {{ accion_form.antecedente }}
                             </div>
         
-                            <div class="px-2 py-1 flex flex-col space-y-2">
-                                <label for="{{ accion_form.descripcion.id_for_label }}">Descripción:</label>
+                            <div class="px-2 py-4 flex flex-col space-y-2 mt-4">
+                                <label for="{{ accion_form.descripcion.id_for_label }}">{{ accion_form.descripcion.label }}:</label>
                                 {{ accion_form.descripcion }}
                             </div>
         
                         </div>
                     </div>
-                    
                 </div>
-                <div class="text-center">
-                    <button class="py-3 px-6 mx-1 bg-inm-marron-200 hover:bg-inm-marron-100 rounded-xl text-white">Guardar Cambios</button>
+                <div class="text-center mt-6">
+                    <button type="submit" class="py-3 px-10 mx-1 bg-inm-marron-200 hover:bg-inm-marron-100 rounded-xl text-white font-bold shadow-lg transform transition active:scale-95">Guardar Cambios</button>
                 </div>
             </div>
         </form>
     </div>
 
+    <!-- Modal for Office Selection -->
+    <div id="officeModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col" style="height: 80vh;">
+            <div class="bg-emerald-900 p-4 text-white flex justify-between items-center">
+                <h2 id="modalTitle" class="text-xl font-bold">Seleccionar Oficinas</h2>
+                <button type="button" onclick="closeOfficeModal()" class="text-white hover:text-gray-300">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="flex-1 flex overflow-hidden">
+                <!-- States Column -->
+                <div class="w-1/4 border-r bg-gray-50 overflow-y-auto p-2">
+                    <h3 class="font-bold text-gray-700 mb-2 px-2 border-b pb-1">Estados</h3>
+                    <div id="stateList" class="space-y-1">
+                        {% for estado in estados %}
+                        <button type="button" onclick="filterOfficesByState('{{ estado.id }}', this)" class="state-btn w-full text-left px-3 py-2 rounded-lg hover:bg-emerald-100 transition text-gray-700 font-medium">
+                            {{ estado.nombre_completo }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Offices Grid -->
+                <div class="flex-1 flex flex-col p-4 overflow-hidden">
+                    <div class="mb-4">
+                        <input type="text" id="officeSearch" onkeyup="filterModalSearch()" placeholder="Buscar oficina..." class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div id="officeList" class="flex-1 overflow-y-auto grid grid-cols-2 gap-3 content-start">
+                        <!-- Offices populated by JS -->
+                        <div class="col-span-2 text-center text-gray-500 py-10">Selecciona un estado para ver las oficinas</div>
+                    </div>
+                </div>
+
+                <!-- Selection Sidebar -->
+                <div class="w-1/4 bg-gray-50 border-l p-4 flex flex-col overflow-hidden">
+                    <h3 class="font-bold text-gray-700 mb-2 border-b pb-1">Seleccionados</h3>
+                    <div id="modalSelectedList" class="flex-1 overflow-y-auto space-y-2 mt-2">
+                        <!-- Selected offices icons/list -->
+                    </div>
+                    <div class="mt-4 pt-4 border-t">
+                        <button type="button" onclick="confirmSelection()" class="w-full bg-emerald-700 text-white rounded-lg py-2 font-bold hover:bg-emerald-800 transition">
+                            Confirmar Selección
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .state-btn.active {
+            background-color: #064e3b !important;
+            color: white !important;
+        }
+        .office-card {
+            border: 1px solid #e5e7eb;
+            padding: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .office-card:hover {
+            border-color: #059669;
+            background-color: #ecfdf5;
+        }
+        .office-card.selected {
+            border-color: #059669;
+            background-color: #d1fae5;
+            box-shadow: 0 0 0 2px #059669;
+        }
+        .tag-pill {
+            background-color: white;
+            color: #064e3b;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            border: 1px solid #064e3b;
+        }
+    </style>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script>
+        // Data from Django
+        const officesData = [
+            {% for oficina in oficinas %}
+            {
+                id: "{{ oficina.id }}",
+                name: "{{ oficina.sede }}",
+                abrev: "{{ oficina.abrev }}",
+                state_id: "{{ oficina.estado.id }}",
+                state_corto: "{{ oficina.estado.corto }}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        let currentTarget = ''; // 'area' or 'area2'
+        let selectedOfficesMapping = {
+            'area': [],
+            'area2': []
+        };
+        let modalSelections = [];
+
         $(document).ready(function() {
-            $("#id_fecha_inicio").datepicker({
+            // Initialize Datepickers
+            $("#id_fecha_inicio, #id_fecha_termino").datepicker({
                 dateFormat: 'dd/mm/yy',
                 dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
                 monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
                 firstDay: 1,
                 prevText: 'Anterior',
                 nextText: 'Siguiente',
-                currentText: 'Hoy',
-                closeText: 'Cerrar',
-                showButtonPanel: false,
-                buttonText: 'Seleccionar fecha',
-                showAnim: 'slideDown',
-                showOtherMonths: true, 
-                selectOtherMonths: true 
+                showAnim: 'slideDown'
             });
-    
-            $("#id_fecha_termino").datepicker({
-                dateFormat: 'dd/mm/yy',
-                dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
-                monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-                firstDay: 1,
-                prevText: 'Anterior',
-                nextText: 'Siguiente',
-                currentText: 'Hoy',
-                closeText: 'Cerrar',
-                showButtonPanel: false,
-                buttonText: 'Seleccionar fecha',
-                showAnim: 'slideDown',
-                showOtherMonths: true, 
-                selectOtherMonths: true 
-            });
+
+            // Initial Sync from hidden selects (load saved data)
+            syncFromSelects();
         });
 
+        function openOfficeModal(target) {
+            currentTarget = target;
+            document.getElementById('modalTitle').innerText = target === 'area' ? 'Seleccionar Plantel / Centro' : 'Seleccionar Áreas Responsables';
+            modalSelections = [...selectedOfficesMapping[target]];
+            renderModalSelections();
+            document.getElementById('officeModal').classList.remove('hidden');
+        }
 
+        function closeOfficeModal() {
+            document.getElementById('officeModal').classList.add('hidden');
+            // Clear search and filters
+            document.getElementById('officeSearch').value = '';
+            document.querySelectorAll('.state-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('officeList').innerHTML = '<div class="col-span-2 text-center text-gray-500 py-10">Selecciona un estado para ver las oficinas</div>';
+        }
 
-    // $(document).ready(function() {
-    //     setTimeout(function() {
-    //         $('#messages').fadeOut('slow');
-    //     }, 5000);
-    // });
+        function filterOfficesByState(stateId, btn) {
+            document.querySelectorAll('.state-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            
+            const filtered = officesData.filter(off => off.state_id === stateId);
+            renderOfficeGrid(filtered);
+        }
 
+        function renderOfficeGrid(offices) {
+            const list = document.getElementById('officeList');
+            list.innerHTML = '';
+            
+            offices.forEach(off => {
+                const isSelected = modalSelections.includes(off.id);
+                const div = document.createElement('div');
+                div.className = `office-card ${isSelected ? 'selected' : ''}`;
+                div.innerHTML = `
+                    <div class="font-bold text-emerald-900">${off.abrev}</div>
+                    <div class="text-xs text-gray-600">${off.name}</div>
+                `;
+                div.onclick = () => toggleModalSelection(off.id, div);
+                list.appendChild(div);
+            });
+        }
 
+        function toggleModalSelection(officeId, element) {
+            const index = modalSelections.indexOf(officeId);
+            if (index > -1) {
+                modalSelections.splice(index, 1);
+                element.classList.remove('selected');
+            } else {
+                modalSelections.push(officeId);
+                element.classList.add('selected');
+            }
+            renderModalSelections();
+        }
 
+        function renderModalSelections() {
+            const list = document.getElementById('modalSelectedList');
+            list.innerHTML = '';
+            
+            modalSelections.forEach(id => {
+                const office = officesData.find(o => o.id === id);
+                if (office) {
+                    const div = document.createElement('div');
+                    div.className = 'flex justify-between items-center bg-emerald-50 p-2 rounded-lg border border-emerald-200';
+                    div.innerHTML = `
+                        <span class="text-sm font-semibold">${office.abrev}</span>
+                        <button type="button" onclick="removeModalSelection('${id}')" class="text-red-500 hover:text-red-700">×</button>
+                    `;
+                    list.appendChild(div);
+                }
+            });
+        }
 
+        function removeModalSelection(id) {
+            modalSelections = modalSelections.filter(mid => mid !== id);
+            renderModalSelections();
+            // Update grid if visible
+            const cards = document.querySelectorAll('.office-card');
+            cards.forEach(card => {
+                if (card.innerText.includes(officesData.find(o => o.id === id).abrev)) {
+                    card.classList.remove('selected');
+                }
+            });
+        }
+
+        function filterModalSearch() {
+            const query = document.getElementById('officeSearch').value.toLowerCase();
+            const filtered = officesData.filter(off => 
+                off.name.toLowerCase().includes(query) || 
+                off.abrev.toLowerCase().includes(query)
+            );
+            renderOfficeGrid(filtered);
+            // Deselect states when searching globally
+            document.querySelectorAll('.state-btn').forEach(b => b.classList.remove('active'));
+        }
+
+        function confirmSelection() {
+            selectedOfficesMapping[currentTarget] = [...modalSelections];
+            syncToSelects(currentTarget);
+            renderTags(currentTarget);
+            closeOfficeModal();
+        }
+
+        function syncToSelects(target) {
+            const selectId = target === 'area' ? 'id_area' : 'id_area2';
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            
+            // Unselect all
+            for (let i = 0; i < select.options.length; i++) {
+                select.options[i].selected = false;
+            }
+            
+            // Select ones in mapping
+            selectedOfficesMapping[target].forEach(id => {
+                const option = Array.from(select.options).find(opt => opt.value === id);
+                if (option) option.selected = true;
+            });
+        }
+
+        function syncFromSelects() {
+            ['area', 'area2'].forEach(target => {
+                const selectId = target === 'area' ? 'id_area' : 'id_area2';
+                const select = document.getElementById(selectId);
+                if (select) {
+                    selectedOfficesMapping[target] = Array.from(select.selectedOptions).map(opt => opt.value);
+                    renderTags(target);
+                }
+            });
+        }
+
+        function renderTags(target) {
+            const tagContainer = document.getElementById(`${target}-tags`);
+            tagContainer.innerHTML = '';
+            
+            selectedOfficesMapping[target].forEach(id => {
+                const office = officesData.find(o => o.id === id);
+                if (office) {
+                    const tag = document.createElement('div');
+                    tag.className = 'tag-pill';
+                    tag.innerHTML = `
+                        <span>${office.state_corto} / ${office.abrev}</span>
+                        <button type="button" onclick="removeTag('${target}', '${id}')" class="hover:text-red-500 font-bold ml-1">×</button>
+                    `;
+                    tagContainer.appendChild(tag);
+                }
+            });
+        }
+
+        function removeTag(target, id) {
+            selectedOfficesMapping[target] = selectedOfficesMapping[target].filter(oid => oid !== id);
+            syncToSelects(target);
+            renderTags(target);
+        }
     </script>
+
 {% endif %}
 {% endblock content %}

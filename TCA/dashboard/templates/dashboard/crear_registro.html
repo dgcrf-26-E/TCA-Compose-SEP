@@ -153,6 +153,18 @@
                         <div class="flex-1 text-center">
         
                             <div class="px-2 flex flex-col space-y-2">
+                                <label>{{ registro_form.area.label }}:</label>
+                                <div id="area-tags" class="flex flex-wrap gap-2 mb-2 justify-center">
+                                    <!-- Tags showing selected areas will appear here -->
+                                </div>
+                                <button type="button" onclick="openOfficeModal('area')" class="bg-white text-emerald-900 rounded-full py-2 px-4 font-semibold hover:bg-gray-100 transition shadow">
+                                    Seleccionar Plantel / Centro
+                                </button>
+                                <div style="display:none;">{{ registro_form.area }}</div>
+                                <div class="text-red-500 text-sm">{{ registro_form.area.errors }}</div>
+                            </div>
+
+                            <div class="px-2 flex flex-col space-y-2 mt-6">
                                 <label for="{{ registro_form.claveAcuerdo.id_for_label }}">{{ registro_form.claveAcuerdo.label }}:</label>
                                 {{ registro_form.claveAcuerdo }}
                                 <div class="text-red-500 text-sm">{{ registro_form.claveAcuerdo.errors }}</div>
@@ -179,20 +191,6 @@
                                 </div>
                             </div>
         
-                            <div class="px-2 flex-1 text-center mt-2">
-                                <div class="flex flex-col space-y-2">
-                                    <label for="{{ registro_form.rubro.id_for_label }}">{{ registro_form.rubro.label }}:</label>
-                                    {{ registro_form.rubro }}
-                                </div>
-                            </div>
-
-                            <div class="px-2 flex-1 text-center mt-2">
-                                <div class="flex flex-col space-y-2">
-                                    <label for="{{ registro_form.periodo.id_for_label }}">{{ registro_form.periodo.label }}:</label>
-                                    {{ registro_form.periodo }}
-                                </div>
-                            </div>
-        
                         </div>
                         
                         <!-- Columna 2 -->
@@ -200,18 +198,6 @@
                             <div class="flex-1 text-center">
         
                                 <div class="px-2 flex flex-col space-y-2">
-                                    <label>{{ registro_form.area.label }}:</label>
-                                    <div id="area-tags" class="flex flex-wrap gap-2 mb-2 justify-center">
-                                        <!-- Tags showing selected areas will appear here -->
-                                    </div>
-                                    <button type="button" onclick="openOfficeModal('area')" class="bg-white text-emerald-900 rounded-full py-2 px-4 font-semibold hover:bg-gray-100 transition shadow">
-                                        Seleccionar Plantel / Centro
-                                    </button>
-                                    <div style="display:none;">{{ registro_form.area }}</div>
-                                    <div class="text-red-500 text-sm">{{ registro_form.area.errors }}</div>
-                                </div>
-        
-                                <div class="px-2 py-10 flex flex-col space-y-2 mt-4">
                                     <label>{{ registro_form.accion1_area2.label }}:</label>
                                     <div id="area2-tags" class="flex flex-wrap gap-2 mb-2 justify-center">
                                         <!-- Tags showing selected areas will appear here -->
@@ -221,6 +207,13 @@
                                     </button>
                                     <div style="display:none;">{{ registro_form.accion1_area2 }}</div>
                                     <div class="text-red-500 text-sm">{{ registro_form.accion1_area2.errors }}</div>
+                                </div>
+
+                                <div class="px-2 flex-1 text-center mt-6">
+                                    <div class="flex flex-col space-y-2">
+                                        <label for="{{ registro_form.rubro.id_for_label }}">{{ registro_form.rubro.label }}:</label>
+                                        {{ registro_form.rubro }}
+                                    </div>
                                 </div>
         
                             </div>
@@ -344,7 +337,8 @@
                 id: "{{ oficina.id }}",
                 name: "{{ oficina.sede }}",
                 abrev: "{{ oficina.abrev }}",
-                state_id: "{{ oficina.estado.id }}"
+                state_id: "{{ oficina.estado.id }}",
+                state_corto: "{{ oficina.estado.corto }}"
             }{% if not forloop.last %},{% endif %}
             {% endfor %}
         ];
@@ -511,7 +505,7 @@
                     const tag = document.createElement('div');
                     tag.className = 'tag-pill';
                     tag.innerHTML = `
-                        <span>${office.abrev}</span>
+                        <span>${office.state_corto} / ${office.abrev}</span>
                         <button type="button" onclick="removeTag('${target}', '${id}')" class="hover:text-red-500 font-bold ml-1">×</button>
                     `;
                     tagContainer.appendChild(tag);

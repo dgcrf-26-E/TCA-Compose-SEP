@@ -8,19 +8,18 @@ from datetime import datetime
 class RegistroConAccionesYPruebasForm(forms.ModelForm):
     class Meta:
         model = Registro
-        fields = ['claveAcuerdo','fecha_inicio', 'fecha_termino', 'rubro', 'area', 'periodo',]
+        fields = ['claveAcuerdo','fecha_inicio', 'fecha_termino', 'rubro', 'area',]
         labels = {
             'area': 'Plantel / Centro',
             'claveAcuerdo': 'Clave de Acuerdo',
             'fecha_inicio': 'Inicio',
             'fecha_termino': 'Termino',
             'rubro': 'Rubro',
-            'periodo': 'Periodo',
         }    
         widgets = {
             'claveAcuerdo': forms.TextInput(attrs={
                 'class': 'text-center border border-gray-300 rounded-full p-2 text-12pt',
-                'placeholder': '000/EDO/OFICINA/MES/AÑO'
+                'placeholder': '000/OFICINA/EDO/MES/AÑO'
             }),
             'fecha_inicio': forms.TextInput(attrs={'class': 'text-center', 'type': 'text'}),
             'fecha_termino': forms.TextInput(attrs={'class': 'text-center', 'type': 'text'}),
@@ -67,10 +66,10 @@ class RegistroConAccionesFORM(forms.ModelForm):
     def clean_claveAcuerdo(self):
         claveAcuerdo = self.cleaned_data.get('claveAcuerdo')
         print(claveAcuerdo)
-        pattern = r'^\d{3}/[A-Z]{1,6}/\d{2}/\d{4}$'
+        pattern = r'^\d{3}/[A-Z]{1,10}/[A-Z]{1,6}/\d{2}/\d{4}$'
 
         if not re.match(pattern, claveAcuerdo):
-            raise ValidationError("La clave del acuerdo debe tener el formato 00/AREA/MES/AÑO.")
+            raise ValidationError("La clave del acuerdo debe tener el formato 000/AREA/OFICINA/MES/AÑO.")
 
         instance_id = self.instance.idRegistro
         if Registro.objects.exclude(idRegistro=instance_id).filter(claveAcuerdo=claveAcuerdo).exists():

@@ -8,7 +8,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, F
 from django.contrib.auth.models import User
 from .mixins import AccessKeyRequiredMixin
 from .forms import UserForm, AccessKeyForm, UsuarioPForm, AreaForm, RubroForm
-from usuarios.models import UsuarioP, Rubro, Area
+from usuarios.models import UsuarioP, Rubro, Area, Oficina, Estados
 
 
 class AccessKeyView(FormView):
@@ -120,6 +120,8 @@ class UsuarioCreateView(AccessKeyRequiredMixin, CreateView):
         return self.render_to_response({
             'user_form': UserForm(),
             'perfil_form': UsuarioPForm(),
+            'estados': Estados.objects.all(),
+            'oficinas': Oficina.objects.all(),
         })
 
     def post(self, request, *args, **kwargs):
@@ -135,6 +137,8 @@ class UsuarioCreateView(AccessKeyRequiredMixin, CreateView):
         return self.render_to_response({
             'user_form': user_form,
             'perfil_form': perfil_form,
+            'estados': Estados.objects.all(),
+            'oficinas': Oficina.objects.all(),
         })
 
 class UsuarioUpdateView(AccessKeyRequiredMixin, UpdateView):
@@ -147,6 +151,8 @@ class UsuarioUpdateView(AccessKeyRequiredMixin, UpdateView):
         return self.render_to_response({
             'user_form': UserForm(instance=perfil.user),
             'perfil_form': UsuarioPForm(instance=perfil),
+            'estados': Estados.objects.all(),
+            'oficinas': Oficina.objects.all(),
         })
 
     def post(self, request, *args, **kwargs):
@@ -161,6 +167,8 @@ class UsuarioUpdateView(AccessKeyRequiredMixin, UpdateView):
         return self.render_to_response({
             'user_form': user_form,
             'perfil_form': perfil_form,
+            'estados': Estados.objects.all(),
+            'oficinas': Oficina.objects.all(),
         })
 
 class UserDeleteView(AccessKeyRequiredMixin, DeleteView):
