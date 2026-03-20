@@ -66,11 +66,10 @@ class RegistroConAccionesFORM(forms.ModelForm):
     def clean_claveAcuerdo(self):
         claveAcuerdo = self.cleaned_data.get('claveAcuerdo')
         print(claveAcuerdo)
-        pattern = r'^\d{3}/[A-Z]{1,10}/[A-Z]{1,6}/\d{2}/\d{4}$'
+        pattern = r'^\d{3}/[A-Z0-9]{1,15}/[A-Z0-9]{1,6}/\d{2}/\d{4}$'
 
         if not re.match(pattern, claveAcuerdo):
-            raise ValidationError("La clave del acuerdo debe tener el formato 000/AREA/OFICINA/MES/AÑO.")
-
+            raise ValidationError("La clave del acuerdo debe tener el formato 000/AREA/OFICINA/MES/AÑO (letras y números permitidos).")
         instance_id = self.instance.idRegistro
         if Registro.objects.exclude(idRegistro=instance_id).filter(claveAcuerdo=claveAcuerdo).exists():
             raise forms.ValidationError("Esta clave de acuerdo ya existe.")
