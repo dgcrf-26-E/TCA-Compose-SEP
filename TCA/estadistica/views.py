@@ -1,7 +1,7 @@
 from datetime import datetime, date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from usuarios.models import Registro, Acciones, Notificacion, Area, Rubro, UsuarioP, Periodo
+from usuarios.models import UsuarioP, Rubro, Registro, Oficina, Estados, Notificacion, Periodo
 from django.db.models import Count, Q, Avg, IntegerField
 from django.db.models.functions import ExtractYear, Substr
 from django.http import HttpResponse
@@ -30,30 +30,17 @@ def general(request):
 
         userDataI = UsuarioP.objects.filter(user__username=request.user).first()
         
-        registros = Registro.objects.filter(area=userDataI.OR)
+        registros = Registro.objects.filter(area=userDataI.oficina)
         if seleccion in opc:
-            registros = Registro.objects.filter(area=userDataI.OR, periodo__id=int(seleccion))
+            registros = Registro.objects.filter(area=userDataI.oficina, periodo__id=int(seleccion))
 
         if userDataI.tipo == "1":
             registros = Registro.objects.all()
             if seleccion in opc:
                 registros = Registro.objects.filter(periodo__id=int(seleccion))
         
-        consultarAreas = Area.objects.all()
+        consultarAreas = Oficina.objects.select_related('estado').all()
         consultarRubros = Rubro.objects.all()
-
-        # nombres_areas = [area.nickname for area in consultarAreas]
-        # # lista_años = [str(año) for año in range(2020, datetime.now().year + 1)]
-        # lista_años = range(2020, datetime.now().year + 1)
-
-        # registros_OR = registros.values('area').annotate(total= Count('idRegistro'))
-        # registros_OR_year = registros.values('area', year=ExtractYear('fecha_inicio')).annotate(total= Count('idRegistro')).order_by('area', 'year')
-
-        # for registro in registros_OR:
-        #     print(f"{consultarAreas.filter(idArea=registro['area']).first().name}  TOTAL {registro['total']}")
-
-        # for registro in registros_OR_year:
-        #     print(f"Área: {consultarAreas.filter(idArea=registro['area']).first().name}, Año: {registro['year']}, Total registros: {registro['total']}")
         
         registro_V_A = []
         visitasT = 0
@@ -71,10 +58,10 @@ def general(request):
             seguimiento = Avg('porcentaje_avance', output_field=IntegerField())
         ).order_by('area', 'fecha_inicio')
 
-        ors_mapa = { area_.name.replace("OR ",""): [] for area_ in consultarAreas[:32]}
+        ors_mapa = { area_.estado.nombre_completo: [] for area_ in consultarAreas[:32]}
 
         for registro in registros_visitas:
-            oficina_ = str(consultarAreas.filter(idArea=registro['area']).first().name).replace("OR ","")
+            oficina_ = str(consultarAreas.filter(id=registro['area']).first().estado.nombre_completo)
             if oficina_ in ors_mapa:
                 ors_mapa[oficina_].append({
                     'fecha': datetime.strftime(registro['fecha_inicio'], "%d/%m/%Y"),
@@ -87,9 +74,10 @@ def general(request):
         # print(ors_mapa)
 
         for registro in registros_visitas:
-            # print(f"OR: {consultarAreas.filter(idArea=registro['area']).first().name} Fecha: {registro['fecha_inicio']} TOTAL {registro['total']}")
+            # print(f"OR: {consultarAreas.filter(id=registro['area']).first().estado.nombre_completo} Fecha: {registro['fecha_inicio']} TOTAL {registro['total']}")
             registro_V_A.append({
-                'area': str(consultarAreas.filter(idArea=registro['area']).first().name).replace("OR ",""),
+                'area': str(consultarAreas.filter(id=registro['area']).first().estado.nombre_completo),
+                'abrev': str(consultarAreas.filter(id=registro['area']).first().abrev),
                 'fecha': datetime.strftime(registro['fecha_inicio'], "%d/%m/%Y"),
                 'total': registro['total'],
                 'pendiente': registro['pendiente'],
