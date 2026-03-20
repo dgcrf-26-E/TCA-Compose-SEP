@@ -148,6 +148,25 @@ def general(request):
         return render(request, "base/error404.html")
 
 @login_required
+def mapa_info(request):
+    userDataI = UsuarioP.objects.filter(user__username=request.user).first()
+    consultarAreas = Oficina.objects.select_related('estado').all()
+
+    # Agrupar oficinas por estado
+    ors_mapa = {}
+    for area in consultarAreas:
+        estado_nombre = area.estado.nombre_completo
+        if estado_nombre not in ors_mapa:
+            ors_mapa[estado_nombre] = []
+        ors_mapa[estado_nombre].append(area.sede)
+    
+    context = {
+        "usuario": userDataI,
+        "mapa": ors_mapa,
+    }
+    return render(request, 'estadistica/mapa_info.html', context)
+
+@login_required
 def pendientes(request):
     if(request.method == "GET"):
 
