@@ -71,10 +71,26 @@ document.addEventListener("DOMContentLoaded", () => {
     tooltip.setAttribute("aria-hidden", "true");
   }
 
+  function normalizeName(str) {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  }
+
+  function getOfficesForState(stateTitle) {
+    const normTitle = normalizeName(stateTitle);
+    for (const key in datos) {
+      if (normalizeName(key).includes(normTitle) || normTitle.includes(normalizeName(key))) {
+        return datos[key];
+      }
+    }
+    return null;
+  }
+
   // Pintar mapa: estados con oficinas en azul claro, sin oficinas en gris
   states.forEach((estado) => {
     const nombre = estado.getAttribute("title");
-    if (datos[nombre]) {
+    const oficinasDelEstado = getOfficesForState(nombre);
+    
+    if (oficinasDelEstado && oficinasDelEstado.length > 0) {
       estado.style.fill = "#60a5fa"; // Azul claro de Tailwind
     } else {
       estado.style.fill = "#cbd5e1"; // Gris suave
@@ -100,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
         modalTitle.textContent = nombre;
         tbody.innerHTML = "";
 
-        const oficinas = datos[nombre];
+        const oficinas = getOfficesForState(nombre);
         if (oficinas && oficinas.length > 0) {
           oficinas.forEach((oficina, index) => {
             const tr = document.createElement("tr");
