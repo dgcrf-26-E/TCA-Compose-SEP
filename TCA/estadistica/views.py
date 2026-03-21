@@ -58,17 +58,28 @@ def general(request):
             seguimiento = Avg('porcentaje_avance', output_field=IntegerField())
         ).order_by('area', 'fecha_inicio')
 
-        ors_mapa = { area_.estado.nombre_completo: [] for area_ in consultarAreas[:32]}
+        # Inicializar todos los estados para que aparezcan en el mapa aunque no tengan oficinas
+        from usuarios.models import Estados
+        todos_estados = Estados.objects.all()
+        ors_mapa = { estado.nombre_completo: [] for estado in todos_estados }
+
+        # Pre-cargar nombres y abreviaturas de estados por ID de oficina para optimizar
+        office_state_map = { area.id: area.estado.nombre_completo for area in consultarAreas }
+        office_name_map = { area.id: area.abrev for area in consultarAreas }
 
         for registro in registros_visitas:
-            oficina_ = str(consultarAreas.filter(id=registro['area']).first().estado.nombre_completo)
-            if oficina_ in ors_mapa:
-                ors_mapa[oficina_].append({
+            # Obtener el nombre del estado directamente del mapa pre-cargado
+            estado_nombre = office_state_map.get(registro['area'])
+            if estado_nombre and estado_nombre in ors_mapa:
+                # Usar .sede si .abrev está vacío, y forzar string
+                nom_ofi = office_name_map.get(registro['area'], "N/A")
+                ors_mapa[estado_nombre].append({
                     'fecha': datetime.strftime(registro['fecha_inicio'], "%d/%m/%Y"),
+                    'nombre_oficina': str(nom_ofi) if nom_ofi else "N/A",
                     'total': registro['total'],
                     'pendiente': registro['pendiente'],
                     'atendido': registro['atendido'],
-                    'avance': registro['seguimiento'],
+                    'avance': registro['seguimiento'] if registro['seguimiento'] is not None else 0,
                     })
         
         # print(ors_mapa)
@@ -152,13 +163,14 @@ def mapa_info(request):
     userDataI = UsuarioP.objects.filter(user__username=request.user).first()
     consultarAreas = Oficina.objects.select_related('estado').all()
 
-    # Agrupar oficinas por estado
-    ors_mapa = {}
+    # Inicializar todos los estados para que aparezcan en el mapa
+    from usuarios.models import Estados
+    ors_mapa = { estado.nombre_completo: [] for estado in Estados.objects.all() }
+    
     for area in consultarAreas:
         estado_nombre = area.estado.nombre_completo
-        if estado_nombre not in ors_mapa:
-            ors_mapa[estado_nombre] = []
-        ors_mapa[estado_nombre].append(area.sede)
+        if estado_nombre in ors_mapa:
+            ors_mapa[estado_nombre].append(area.sede)
     
     context = {
         "usuario": userDataI,

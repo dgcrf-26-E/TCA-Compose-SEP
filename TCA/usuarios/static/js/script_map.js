@@ -76,49 +76,49 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   //-----------------------------------------------------------
 
-    // Posición de la barra de colores a la derecha
-    const legendX = width - 80;  // 50 px desde el borde derecho
-    const legendY = 50;
-    const legendWidth = 20;
-    const legendHeight = 300;
+  // Posición de la barra de colores a la derecha
+  const legendX = width - 80;  // 50 px desde el borde derecho
+  const legendY = 50;
+  const legendWidth = 20;
+  const legendHeight = 300;
 
-    // Escala de color en hex
-    const colorScaleI = d3.scaleLinear()
-      .domain([0, 0.5, 1])
-      .range(["#612332", "#e6d194", "#002f2a"]);
+  // Escala de color en hex
+  const colorScaleI = d3.scaleLinear()
+    .domain([0, 0.5, 1])
+    .range(["#612332", "#e6d194", "#002f2a"]);
 
-    // Dibujar la barra de color vertical con 100 pasos
-    const steps = 100;
-    const stepHeight = legendHeight / steps;
+  // Dibujar la barra de color vertical con 100 pasos
+  const steps = 100;
+  const stepHeight = legendHeight / steps;
 
-    for(let i = 0; i < steps; i++) {
-      svg.append("rect")
-        .attr("x", legendX)
-        .attr("y", legendY + i * stepHeight)
-        .attr("width", legendWidth)
-        .attr("height", stepHeight)
-        .attr("fill", colorScaleI(1 - i/(steps-1))); // invertir para que 0% arriba y 100% abajo
-    }
+  for (let i = 0; i < steps; i++) {
+    svg.append("rect")
+      .attr("x", legendX)
+      .attr("y", legendY + i * stepHeight)
+      .attr("width", legendWidth)
+      .attr("height", stepHeight)
+      .attr("fill", colorScaleI(1 - i / (steps - 1))); // invertir para que 0% arriba y 100% abajo
+  }
 
-    // Etiquetas: 0%, 50%, 100%
-    const labels = [
-      {text: "100%", y: legendY},  // arriba
-      {text: "50%", y: legendY + legendHeight/2}, // medio
-      {text: "0%", y: legendY + legendHeight}   // abajo
-    ];
+  // Etiquetas: 0%, 50%, 100%
+  const labels = [
+    { text: "100%", y: legendY },  // arriba
+    { text: "50%", y: legendY + legendHeight / 2 }, // medio
+    { text: "0%", y: legendY + legendHeight }   // abajo
+  ];
 
-    svg.selectAll(".legend-label")
-      .data(labels)
-      .enter()
-      .append("text")
-      .attr("x", legendX + legendWidth + 5)
-      .attr("y", d => d.y)
-      .attr("alignment-baseline", d => {
-        if(d.text === "0%") return "hanging";
-        if(d.text === "50%") return "middle";
-        return "baseline";
-      })
-      .text(d => d.text);
+  svg.selectAll(".legend-label")
+    .data(labels)
+    .enter()
+    .append("text")
+    .attr("x", legendX + legendWidth + 5)
+    .attr("y", d => d.y)
+    .attr("alignment-baseline", d => {
+      if (d.text === "0%") return "hanging";
+      if (d.text === "50%") return "middle";
+      return "baseline";
+    })
+    .text(d => d.text);
 
   //-----------------------------------------------------------
 
@@ -144,8 +144,8 @@ document.addEventListener("DOMContentLoaded", () => {
           continue;
         }
 
-        // Caso: objeto con 'indice'
-        if (typeof item === "object" && "avance" in item) {
+        // Caso: objeto con 'avance'
+        if (typeof item === "object" && "avance" in item && item.avance !== null) {
           const ind = Number(item.avance);
           if (!Number.isNaN(ind)) {
             indices.push(ind);
@@ -201,19 +201,25 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  const numerosAleatorios = [];
+  function normalizeName(str) {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  }
 
-  Object.entries(datos).forEach(([estado, valor]) => {
-    const numero = obtenerValor(valor);
-    numerosAleatorios.push(numero.toFixed(0));
-  });
+  function getDataForState(stateTitle) {
+    const normTitle = normalizeName(stateTitle);
+    // 1. Prioridad: Coincidencia exacta
+    for (const key in datos) {
+      if (normalizeName(key) === normTitle) return datos[key];
+    }
+    // 2. Coincidencia parcial (substring)
+    for (const key in datos) {
+      if (normalizeName(key).includes(normTitle) || normTitle.includes(normalizeName(key))) {
+        return datos[key];
+      }
+    }
+    return null;
+  }
 
-  // const numerosAleatorios = [];
-  // for (let i = 0; i < 32; i++) {
-  //   // Genera un número entero entre 0 y 100 (inclusive)
-  //   const numero = Math.floor(Math.random() * 101);
-  //   numerosAleatorios.push(numero);
-  // }
   //-----------------------------------------------------------
 
   function show(name, clientX, clientY) {
@@ -235,15 +241,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // attach listeners
-  states.forEach((el, index) => {
-    const name =
-      el.dataset.name || el.getAttribute("title") || el.id || "Estado";
+  states.forEach((el) => {
+    const name = el.dataset.name || el.getAttribute("title") || el.id || "Estado";
+
+    const stateData = getDataForState(name);
+    let avanceT = stateData ? obtenerValor(stateData) : 200;
+    if (avanceT != 200) avanceT = avanceT.toFixed(0);
+
     el.addEventListener("mouseenter", (e) => {
       show(name, e.clientX, e.clientY);
     });
     el.addEventListener("mousemove", (e) => {
-      let avanceT = numerosAleatorios[index % numerosAleatorios.length];
-      // console.log(avanceT);
       if (avanceT == 200) {
         show(name + "\nSin visita", e.clientX, e.clientY);
       } else {
@@ -270,14 +278,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const mapGroup = document.getElementById("map-data");
   const estados = mapGroup.querySelectorAll("path");
 
-  estados.forEach((estado, index) => {
+  estados.forEach((estado) => {
+    const name = estado.getAttribute("title");
+    const stateData = getDataForState(name);
+    let avanceT = stateData ? obtenerValor(stateData) : 200;
+
     let color = "#808080";
-    if (numerosAleatorios[index] === 200) {
+    if (avanceT == 200) {
       color = "#808080";
     } else {
-      color = semaforoColors[numerosAleatorios[index % semaforoColors.length]]; // cicla si hay más estados que colores
+      let idxColor = Math.round(avanceT);
+      if (idxColor > 100) idxColor = 100;
+      if (idxColor < 0) idxColor = 0;
+      color = semaforoColors[idxColor];
     }
-    // console.log(color);
     estado.style.fill = color;
   });
   //-----------------------------------------------------------
@@ -301,7 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return td;
   }
 
-  estados.forEach((estado, index) => {
+  estados.forEach((estado) => {
     estado.addEventListener("click", () => {
       // Cancelar cualquier timeout anterior
       clearTimeout(modalTimeout);
@@ -310,60 +324,65 @@ document.addEventListener("DOMContentLoaded", () => {
         const nombre = estado.getAttribute("title");
         modalTitle.textContent = nombre;
 
-        const avacesOR = numerosAleatorios[index % semaforoColors.length]
+        const stateData = getDataForState(nombre);
+        let avacesOR = stateData ? obtenerValor(stateData) : 200;
+
+        let tableContainer = document.getElementById("tabla_M").parentElement;
 
         if (avacesOR == 200) {
-          modalInfo.textContent =
-          "Sin visita";
-          document.getElementById("tabla_M").style.display = 'none';
+          modalInfo.textContent = "Sin visita";
+          tableContainer.style.display = 'none';
         } else {
-          document.getElementById("tabla_M").style.display = 'block';
-          modalInfo.textContent =
-            "Avance de Seguimiento: " +
-            avacesOR +
-            "%";
+          tableContainer.style.display = 'block';
+          modalInfo.textContent = "Avance de Seguimiento: " + avacesOR.toFixed(0) + "%";
         }
-        
-        
+
         const tbody = document.getElementById("mi-tbody");
         tbody.innerHTML = "";
 
-        Object.values(datos)[index].map((items, index2) => {
-          if (Array.isArray(items)) {
-            // caso: lista de objetos
-            items.forEach(item => {
+        if (stateData) {
+          stateData.map((items, index2) => {
+            if (Array.isArray(items)) {
+              // caso: lista de objetos
+              items.forEach(item => {
+                const tr = document.createElement("tr");
+                tr.appendChild(crearTd(index2 + 1));
+                tr.appendChild(crearTd(item.fecha));
+                // Usando nombre_oficina para evitar conflictos
+                console.log("VisitData:", item);
+                tr.appendChild(crearTd(item.nombre_oficina || "N/A"));
+                tr.appendChild(crearTd(item.total));
+                tr.appendChild(crearTd(item.atendido));
+                if (item.pendiente > 0) {
+                  tr.appendChild(crearTdR(item.pendiente));
+                } else {
+                  tr.appendChild(crearTd(item.pendiente));
+                }
+                tr.appendChild(crearTd(item.avance));
+                tbody.appendChild(tr);
+              });
+            } else if (typeof items === "object" && items !== null) {
+              // caso: un solo objeto
+              console.log(1, items.total, "aten" + items.atendido, items.pendiente)
               const tr = document.createElement("tr");
-              tr.appendChild(crearTd(index2+1));
-              tr.appendChild(crearTd(item.fecha));
-              tr.appendChild(crearTd(item.total));
-              tr.appendChild(crearTd(item.atendido));
-              if (item.pendiente > 0 ){
-                tr.appendChild(crearTdR(item.pendiente));
-              } else {
-                tr.appendChild(crearTd(item.pendiente));
-              }
-              tr.appendChild(crearTd(item.avance));
-              tbody.appendChild(tr);
-            });
-          } else if (typeof items === "object" && items !== null) {
-            // caso: un solo objeto
-            console.log(1,items.total, "aten"+items.atendido, items.pendiente)
-            const tr = document.createElement("tr");
-            tr.appendChild(crearTd(1));
-            tr.appendChild(crearTd(items.fecha));
-            tr.appendChild(crearTd(items.total));
-            tr.appendChild(crearTd(items.atendido));
-            if (items.pendiente > 0 ){
+              tr.appendChild(crearTd(1));
+              tr.appendChild(crearTd(items.fecha));
+              console.log("SingleVisitData:", items);
+              tr.appendChild(crearTd(items.nombre_oficina || "N/A"));
+              tr.appendChild(crearTd(items.total));
+              tr.appendChild(crearTd(items.atendido));
+              if (items.pendiente > 0) {
                 tr.appendChild(crearTdR(items.pendiente));
-            } else {
+              } else {
                 tr.appendChild(crearTd(items.pendiente));
+              }
+              tr.appendChild(crearTd(items.avance));
+              tbody.appendChild(tr);
             }
-            tr.appendChild(crearTd(items.avance));
-            tbody.appendChild(tr);
-          }
-        });
+          });
+        }
         modal.style.display = "block";
-      }, 750);
+      }, 300);
     });
   });
 
@@ -385,20 +404,20 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // if (Array.isArray(items) && items.length > 0) {
-          //   console.log(items);
-          //   items.forEach( item => {
-          //     const tr = document.createElement("tr");
-          //     tr.appendChild(crearTd(item.fecha));
-          //     tr.appendChild(crearTd(item.total));
-          //     tr.appendChild(crearTd(item.pendiente));
-          //     tr.appendChild(crearTd(item.atendido));
-          //     tr.appendChild(crearTd(item.avance));
-          //     // // Crear celda
-          //     // const td = document.createElement("td");
-          //     // td.className = "bg-gray-500 border border-gray-300 text-sm px-2 py-2 text-center";
-          //     // td.textContent = "Dato 1";
-          //     // // Agregar celda a la fila
-          //     // tr.appendChild(td);
-          //     // Agregar fila al tbody
-          //     tbody.appendChild(tr);
-          //   });
+//   console.log(items);
+//   items.forEach( item => {
+//     const tr = document.createElement("tr");
+//     tr.appendChild(crearTd(item.fecha));
+//     tr.appendChild(crearTd(item.total));
+//     tr.appendChild(crearTd(item.pendiente));
+//     tr.appendChild(crearTd(item.atendido));
+//     tr.appendChild(crearTd(item.avance));
+//     // // Crear celda
+//     // const td = document.createElement("td");
+//     // td.className = "bg-gray-500 border border-gray-300 text-sm px-2 py-2 text-center";
+//     // td.textContent = "Dato 1";
+//     // // Agregar celda a la fila
+//     // tr.appendChild(td);
+//     // Agregar fila al tbody
+//     tbody.appendChild(tr);
+//   });

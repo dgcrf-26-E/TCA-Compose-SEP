@@ -100,16 +100,17 @@
           <h1 id="modalAvance" class="text-xl font-bold text-gray-700"></h1>
           <br>
           
-          <div class="w-full">
-            <table id="tabla_M" class="table-auto w-fit mx-auto border-collapse">
-              <thead>
+          <div class="max-h-[400px] overflow-y-auto w-full border border-gray-300 shadow-sm relative">
+            <table id="tabla_M" class="table-auto w-full mx-auto border-collapse">
+              <thead class="sticky top-0 z-10">
                 <tr>
                   <th class="bg-gray-500 border border-gray-300 text-sm px-2 py-2 text-center"># Visitas</th>
-                  <th class="bg-black border border-gray-300 text-sm px-2 py-2 text-center">Fecha</th>
-                  <th class="bg-gray-500 border border-gray-300 text-sm px-2 py-2 text-center"># Acuerdos</th>
-                  <th class="bg-black border border-gray-300 text-sm px-2 py-2 text-center"># Atendidos</th>
-                  <th class="bg-gray-500 border border-gray-300 text-sm px-2 py-2 text-center"># Pendientes</th>
-                  <th class="bg-gray-500 border border-gray-300 text-sm px-2 py-2 text-center">% Avance</th>
+                  <th class="bg-black border border-gray-300 text-sm px-2 py-2 text-center text-white">Fecha</th>
+                  <th class="bg-gray-500 border border-gray-300 text-sm px-2 py-2 text-center text-white">Oficina</th>
+                  <th class="bg-black border border-gray-300 text-sm px-2 py-2 text-center text-white"># Acuerdos</th>
+                  <th class="bg-gray-500 border border-gray-300 text-sm px-2 py-2 text-center text-white"># Atendidos</th>
+                  <th class="bg-black border border-gray-300 text-sm px-2 py-2 text-center text-white"># Pendientes</th>
+                  <th class="bg-gray-500 border border-gray-300 text-sm px-2 py-2 text-center text-white">% Avance</th>
                 </tr>
               </thead>
               <tbody id="mi-tbody">
