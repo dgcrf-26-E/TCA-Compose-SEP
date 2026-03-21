@@ -114,12 +114,12 @@
         <option value="show_all">Mostrar todos</option>
         {% if dataU.0.tipo == "1" %}
         {% for area in areas_n %}
-        <option value="{{ area }}">{{ area }}</option>
+        <option value="{{ area.abrev }}">{{ area.abrev }}</option>
         {% endfor %}
         {% elif dataU.0.tipo == "2" %}
         {% for area in areas_n %}
-        {% if forloop.counter > 32 %}
-        <option value="{{ area }}">{{ area }}</option>
+        {% if area.estado.nombre_completo == 'OFICINAS CENTRALES' %}
+        <option value="{{ area.abrev }}">{{ area.abrev }}</option>
         {% endif %}
         {% endfor %}
         {% endif %}

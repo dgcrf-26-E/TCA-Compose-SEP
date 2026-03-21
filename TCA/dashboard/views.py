@@ -51,13 +51,13 @@ def dashboard(request):
         # print(f"filtro {filtro}")
         # print(f"filtro {tiempo}")
 
-        consultarAreas = Oficina.objects.all()
-        lista_años = [str(año) for año in range(2020, datetime.now().year + 1)]
+        consultarAreas = Oficina.objects.select_related('estado').all()
+        lista_años = [str(año) for año in range(2026, datetime.now().year + 1)]
 
         userDataI = UsuarioP.objects.filter(user__username=request.user)
         registrosConFechas = []
         nombres_areas = [area.abrev for area in consultarAreas]
-        areas_n = nombres_areas if len(nombres_areas) > 1 else None
+        areas_n = consultarAreas if consultarAreas.count() > 1 else None
 
         registros = Registro.objects.all()
 
@@ -73,7 +73,7 @@ def dashboard(request):
                 registros = registros.filter(fecha_inicio__year=tiempo)
 
             if respA in nombres_areas:
-                filtroC = Area.objects.get(nickname = respA)
+                filtroC = Oficina.objects.get(abrev = respA)
                 registros = registros.filter(accionR__area2=filtroC)
             
             # print(f"registros {registros.count()}")
@@ -95,7 +95,7 @@ def dashboard(request):
                 registros = registros.filter(fecha_inicio__year=tiempo)
 
             if respA in nombres_areas:
-                filtroC = Area.objects.get(nickname = respA)
+                filtroC = Oficina.objects.get(abrev = respA)
                 registros = registros.filter(accionR__area2=filtroC)
             
             # print(f"registros {registros.count()}")
