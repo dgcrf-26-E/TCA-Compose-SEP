@@ -43,7 +43,7 @@ class RegistroConAccionesYPruebasForm(forms.ModelForm):
     )
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['area'].queryset = Oficina.objects.filter(pk__lt=33)
+        self.fields['area'].queryset = Oficina.objects.all()
         if not self.instance.pk:
             self.initial['claveAcuerdo'] = ""
 

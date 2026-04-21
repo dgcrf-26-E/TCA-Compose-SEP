@@ -127,7 +127,7 @@
 {% if dataU.0.tipo == "1" %}
     <div class="p-5 flex items-center justify-center">
 
-        <form class="w-full" method="post" id="registro-form">
+        <form class="w-full" method="post" id="registro-form" novalidate>
             {% if messages %}
             <div class="w-full mb-4" id="messages">
                 {% for message in messages %}
