@@ -57,6 +57,11 @@ class RegistroConAccionesFORM(forms.ModelForm):
             'estado': 'Estatus',
             'porcentaje_avance': 'Porcentaje de Avance'
         }
+        widgets = {
+            'area': forms.SelectMultiple(attrs={'size': '7'}),
+            'rubro': forms.SelectMultiple(attrs={'size': '6'}),
+            'periodo': forms.SelectMultiple(attrs={'size': '3'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -121,6 +126,7 @@ class AccionesForm(forms.ModelForm):
             'area2': 'Áreas Responsables',
         }
         widgets = {
+            'area2': forms.SelectMultiple(attrs={'size': '7'}),
             'antecedente': forms.Textarea(attrs={
                 'cols': 30,
                 'rows': 7,
@@ -130,6 +136,10 @@ class AccionesForm(forms.ModelForm):
                 'rows': 7,
             }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['area2'].queryset = Oficina.objects.all()
 
 class MensajeForm(forms.ModelForm):
     class Meta:
