@@ -60,7 +60,7 @@ class RegistroConAccionesFORM(forms.ModelForm):
         widgets = {
             'area': forms.SelectMultiple(attrs={'size': '7'}),
             'rubro': forms.SelectMultiple(attrs={'size': '6'}),
-            'periodo': forms.SelectMultiple(attrs={'size': '3'}),
+            'periodo': forms.Select(attrs={'class': 'w-full p-2 border rounded'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -71,7 +71,7 @@ class RegistroConAccionesFORM(forms.ModelForm):
     def clean_claveAcuerdo(self):
         claveAcuerdo = self.cleaned_data.get('claveAcuerdo')
         print(claveAcuerdo)
-        pattern = r'^\d{3}/[A-Z0-9]{1,15}/[A-Z0-9]{1,6}/\d{2}/\d{4}$'
+        pattern = r'^\d{3}/[a-zA-Z0-9_-]{1,15}/[a-zA-Z0-9_-]{1,10}/\d{2}/\d{4}$'
 
         if not re.match(pattern, claveAcuerdo):
             raise ValidationError("La clave del acuerdo debe tener el formato 000/AREA/OFICINA/MES/AÑO (letras y números permitidos).")
