@@ -35,11 +35,11 @@ class RegistroConAccionesYPruebasForm(forms.ModelForm):
     )
     accion1_descripcion = forms.CharField(
         widget=forms.Textarea(attrs={'cols': 30, 'rows': 5}), 
-        label="Acciones a realizar"
+        label="Descripción del Acuerdo"
     )
     accion1_antecedente = forms.CharField(
         widget=forms.Textarea(attrs={'cols': 30, 'rows': 5}), 
-        label="Hallazgo(s)"
+        label="Hallazgo(s) y Acciones a Realizar"
     )
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -124,6 +124,8 @@ class AccionesForm(forms.ModelForm):
         fields = ['area2', 'antecedente','descripcion']
         labels = {
             'area2': 'Áreas Responsables',
+            'antecedente': 'Hallazgo(s) y Acciones a Realizar',
+            'descripcion': 'Descripción del Acuerdo',
         }
         widgets = {
             'area2': forms.SelectMultiple(attrs={'size': '7'}),

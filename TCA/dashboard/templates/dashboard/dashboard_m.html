@@ -176,12 +176,12 @@
           </p>
 
           {% for accion in data.registro.accionR.all %}
-            <h2 class="text-lg font-bold">Descripción</h2>
+            <h2 class="text-lg font-bold">Descripción del Acuerdo</h2>
             <p class="dato-desc text-gray-600 line-clamp-3">
                 {{ accion.descripcion }}
             </p>
 
-            <h2 class="text-lg font-bold">Hallazgo:</h2>
+            <h2 class="text-lg font-bold">Hallazgo(s) y Acciones a Realizar:</h2>
             <p class="text-gray-600 line-clamp-3">
               {{ accion.antecedente }}
             </p>
